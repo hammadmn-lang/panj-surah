@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Account & Data Deletion - Panj Surah</title>
+  <meta name="description" content="Official Account and Data Deletion Request page for Panj Surah: Daily Prayers & Quran companion application.">
+  <link rel="canonical" href="https://panj-surah-privacy.netlify.app/delete-account.html">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0e0d;
+      --card-bg: #111816;
+      --card-border: #1e2d27;
+      --emerald: #10b981;
+      --emerald-light: #34d399;
+      --emerald-dark: #064e3b;
+      --rose: #f43f5e;
+      --rose-dark: #881337;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+      padding: 24px 16px 64px 16px;
+    }
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      padding: 40px 20px 32px 20px;
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.12) 0%, rgba(16, 185, 129, 0.04) 100%);
+      border-radius: 24px;
+      border: 1px solid var(--card-border);
+      margin-bottom: 28px;
+    }
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: var(--rose-dark);
+      border: 2px solid var(--rose);
+      color: #fda4af;
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+    .title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      color: #fda4af;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .compliance-pill {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid var(--rose);
+      color: #fca5a5;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid #1e2923;
+      padding-bottom: 10px;
+    }
+    p {
+      margin-bottom: 14px;
+      color: #cbd5e1;
+      font-size: 14.5px;
+    }
+    ul, ol {
+      margin: 12px 0 16px 20px;
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    strong {
+      color: #ffffff;
+    }
+    .step-box {
+      background: rgba(16, 185, 129, 0.06);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin: 14px 0;
+    }
+    .warning-box {
+      background: rgba(244, 63, 94, 0.08);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin: 14px 0;
+      color: #fecdd3;
+    }
+    .email-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #e11d48;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      margin-top: 10px;
+      transition: background 0.2s ease;
+    }
+    .email-btn:hover {
+      background: #be123c;
+    }
+    .secondary-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1e2923;
+      border: 1px solid var(--emerald);
+      color: #6ee7b7;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 10px 20px;
+      border-radius: 12px;
+      margin-top: 10px;
+      margin-left: 10px;
+      transition: background 0.2s ease;
+    }
+    .secondary-btn:hover {
+      background: #273730;
+      color: #ffffff;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 12.5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header class="header">
+      <div class="logo-badge">🗑️</div>
+      <div class="subtitle">Google Play &amp; GDPR Compliance</div>
+      <h1 class="title">Request Account &amp; Data Deletion</h1>
+      <p style="font-size: 13.5px; color: #94a3b8; max-width: 580px; margin: 0 auto;">
+        Panj Surah: Daily Prayers &amp; Quran Companion respects your sacred privacy. Learn how to immediately purge your account and all associated worship data.
+      </p>
+      <div class="compliance-pill">Google Play Data Safety Policy Compliant</div>
+    </header>
+
+    <!-- METHOD 1: IN-APP DELETION -->
+    <section class="card">
+      <h2><span>📱</span> Option 1: Instant In-App Deletion (Recommended)</h2>
+      <p>
+        If you have the <strong>Panj Surah</strong> app installed on your Android device, you can delete your account and all cloud/local records instantly:
+      </p>
+      <div class="step-box">
+        <ol>
+          <li>Open the <strong>Panj Surah</strong> app on your device.</li>
+          <li>Tap on the <strong>Profile</strong> tab in the bottom navigation bar.</li>
+          <li>Scroll down to the <strong>"User Account &amp; Data Deletion"</strong> card.</li>
+          <li>Click the red <strong>"Delete Account &amp; Data"</strong> button.</li>
+          <li>Confirm the prompt. Your credentials, cloud records, and local worship cache will be wiped immediately.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- METHOD 2: WEB / EMAIL REQUEST -->
+    <section class="card">
+      <h2><span>✉️</span> Option 2: Request Deletion via Email (Web Request)</h2>
+      <p>
+        If you have already uninstalled the application or cannot access your device, you can submit an account deletion request directly to our developer team:
+      </p>
+      
+      <div class="step-box">
+        <ul>
+          <li><strong>Recipient Email:</strong> <code style="color: #34d399; font-weight: 700;">hammadmn99@gmail.com</code></li>
+          <li><strong>Subject Line:</strong> <code>Account & Data Deletion Request - Panj Surah</code></li>
+          <li><strong>Information to Include:</strong> The registered email address you used to register or log into the Panj Surah app.</li>
+        </ul>
+      </div>
+
+      <p>
+        Click the button below to generate a pre-formatted email deletion request:
+      </p>
+
+      <a href="mailto:hammadmn99@gmail.com?subject=Account%20%26%20Data%20Deletion%20Request%20-%20Panj%20Surah&body=Hello%20Panj%20Surah%20Team%2C%0A%0APlease%20permanently%20delete%20my%20user%20account%20and%20all%20associated%20cloud%20records%20for%20my%20registered%20email%3A%0A%5BEnter%20your%20registered%20email%20here%5D%0A%0AThank%20you." class="email-btn">
+        ✉️ Submit Deletion Request via Email
+      </a>
+      <a href="/privacy.html" class="secondary-btn">
+        Read Full Privacy Policy →
+      </a>
+    </section>
+
+    <!-- WHAT DATA IS DELETED -->
+    <section class="card">
+      <h2><span>🛡️</span> What Data Is Deleted?</h2>
+      <p>
+        Upon receiving and processing your deletion request, the following information is permanently removed without retention:
+      </p>
+      <ul>
+        <li><strong>Account Authentication:</strong> Your email address, encrypted password token, and registration timestamp.</li>
+        <li><strong>Prayer Records:</strong> All 5-prayer completion logs and streak history.</li>
+        <li><strong>Fasting Calendar:</strong> Ramadan logs, voluntary fasting records, and suhoor/iftar checklists.</li>
+        <li><strong>Tasbeeh &amp; Dhikr:</strong> Total lifetime counter, daily logs, and custom dhikr presets.</li>
+        <li><strong>Bookmarks &amp; Settings:</strong> Surah reading progress, favorite Duas, and notification choices.</li>
+      </ul>
+
+      <div class="warning-box">
+        <strong>Data Retention Period:</strong> We do NOT retain residual copies of your prayer logs or credentials. Deletion is irrevocable and completed within <strong>48 hours</strong> of your email request.
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>© 2026 Panj Surah. All Rights Reserved. • Support: <a href="mailto:hammadmn99@gmail.com" style="color: #34d399;">hammadmn99@gmail.com</a></p>
+      <p style="margin-top: 6px; font-size: 11px;">Complies with Google Play Developer Policy, GDPR Article 17, and CCPA regulations.</p>
+    </footer>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "Panj Surah - Daily Prayers",
+  "description": "Comprehensive Islamic companion featuring accurate prayer times, Qibla compass, Panj Surah & 10 beginner Surahs with verse audio & offline caching, Durood Sharif collection, Situational Duas, Islamic history events, Digital Tasbeeh, and daily prayer tracking dashboard.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

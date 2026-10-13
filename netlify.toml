@@ -1,0 +1,45 @@
+[build]
+  publish = "dist"
+  command = "npm run build"
+
+[[headers]]
+  for = "/.well-known/assetlinks.json"
+  [headers.values]
+    Content-Type = "application/json"
+    Access-Control-Allow-Origin = "*"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/privacy.html"
+  [headers.values]
+    Content-Type = "text/html; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/delete-account.html"
+  [headers.values]
+    Content-Type = "text/html; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[redirects]]
+  from = "/.well-known/assetlinks.json"
+  to = "/.well-known/assetlinks.json"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/privacy.html"
+  to = "/privacy.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/delete-account.html"
+  to = "/delete-account.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
