@@ -1,12 +1,8 @@
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "com.hammad.panjsurah",
-      "sha256_cert_fingerprints": [
-        "REPLACE_WITH_YOUR_RELEASE_KEY_SHA256_FINGERPRINT"
-      ]
-    }
-  }
-]
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.hammad.panjsurah",
+        "sha256_cert_fingerprints": ["6C:71:91:4F:F6:2A:83:89:6B:8D:84:36:83:A2:2F:A0:7C:7F:4D:6A:49:1F:9B:03:04:CC:96:09:6C:62:5C:AD"]
+      }
+    }]
