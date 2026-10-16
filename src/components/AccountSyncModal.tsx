@@ -33,6 +33,7 @@ interface AccountSyncModalProps {
   onClose: () => void;
   userProfile: UserProfile;
   onUpdateProfile: (updated: Partial<UserProfile>) => void;
+  onSuccessLogon?: () => void;
 }
 
 export const AccountSyncModal: React.FC<AccountSyncModalProps> = ({
@@ -40,6 +41,7 @@ export const AccountSyncModal: React.FC<AccountSyncModalProps> = ({
   onClose,
   userProfile,
   onUpdateProfile,
+  onSuccessLogon,
 }) => {
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot'>('login');
   const [emailInput, setEmailInput] = useState(userProfile.email || 'hammadmn99@gmail.com');
@@ -72,6 +74,17 @@ export const AccountSyncModal: React.FC<AccountSyncModalProps> = ({
     setIsLoading(true);
     setStatusMessage(null);
 
+    const handleSuccessAndRedirect = (msg: string) => {
+      setStatusMessage({ type: 'success', text: msg });
+      setTimeout(() => {
+        if (onSuccessLogon) {
+          onSuccessLogon();
+        } else {
+          onClose();
+        }
+      }, 500);
+    };
+
     if (authMode === 'register') {
       const result = await registerUserAccount(emailInput, passwordInput, userProfile);
       setIsLoading(false);
@@ -80,7 +93,7 @@ export const AccountSyncModal: React.FC<AccountSyncModalProps> = ({
           ...result.syncedProfile,
           password: passwordInput,
         });
-        setStatusMessage({ type: 'success', text: result.message });
+        handleSuccessAndRedirect(result.message + ' Taking you to home page...');
       } else {
         setStatusMessage({ type: 'error', text: result.message });
       }
@@ -93,11 +106,7 @@ export const AccountSyncModal: React.FC<AccountSyncModalProps> = ({
           ...result.syncedProfile,
           password: passwordInput,
         });
-        setStatusMessage({
-          type: 'success',
-          text: `Password has been reset successfully for ${emailInput}. You are now logged in.`,
-        });
-        setAuthMode('login');
+        handleSuccessAndRedirect(`Password reset successfully for ${emailInput}. Taking you to home page...`);
       } else {
         setStatusMessage({ type: 'error', text: result.message });
       }
@@ -110,7 +119,7 @@ export const AccountSyncModal: React.FC<AccountSyncModalProps> = ({
           ...result.syncedProfile,
           password: passwordInput,
         });
-        setStatusMessage({ type: 'success', text: result.message });
+        handleSuccessAndRedirect(result.message + ' Taking you to home page...');
       } else {
         setStatusMessage({ type: 'error', text: result.message });
       }

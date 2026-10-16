@@ -21,6 +21,7 @@ import {
   HardDrive,
   Moon,
   Sun,
+  Eye,
   Shield,
   Heart,
   BookOpen,
@@ -268,6 +269,9 @@ export const ProfileDashboardView: React.FC<ProfileDashboardViewProps> = ({
   const dhikrScoreRatio = Math.min(1.0, weeklyTasbeehTotal / currentWeeklyDhikrGoal);
   const spiritualConsistencyScore = Math.round((prayerScoreRatio * 0.6 + dhikrScoreRatio * 0.4) * 100);
 
+  const isDark = userProfile.theme === 'dark' || userProfile.theme === 'emerald-dark';
+  const isBright = userProfile.theme === 'bright';
+
   const handleSaveGoalTargets = (dhikrVal?: number, prayerVal?: number) => {
     const finalDhikr = Math.max(10, dhikrVal ?? tempDailyDhikrGoal);
     const finalPrayer = Math.min(5, Math.max(1, prayerVal ?? tempDailyPrayerGoal));
@@ -349,10 +353,24 @@ export const ProfileDashboardView: React.FC<ProfileDashboardViewProps> = ({
   return (
     <div className="space-y-6 pb-20 sm:pb-12 max-w-4xl mx-auto px-2 sm:px-0 animate-fade-in">
       {/* Profile Header Hero Card */}
-      <div className="bg-gradient-to-r from-neutral-900 via-neutral-900 to-neutral-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-neutral-800 relative overflow-hidden">
+      <div
+        className={`rounded-3xl p-6 sm:p-8 shadow-xl border relative overflow-hidden transition-all ${
+          isBright
+            ? 'bg-white border-2 border-black text-black shadow-md ring-1 ring-black'
+            : isDark
+            ? 'bg-gradient-to-r from-neutral-950 via-emerald-950/60 to-neutral-950 text-white border-neutral-800'
+            : 'bg-emerald-50/90 border-2 border-emerald-200 text-slate-900'
+        }`}
+      >
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center font-bold text-2xl shadow-lg border-2 border-neutral-700 shrink-0">
+            <div
+              className={`w-16 h-16 sm:w-20 sm:h-20 rounded-3xl flex items-center justify-center font-bold text-2xl shadow-lg border-2 shrink-0 ${
+                isBright
+                  ? 'bg-black text-white border-black'
+                  : 'bg-gradient-to-br from-emerald-600 to-teal-700 text-white border-emerald-400/50'
+              }`}
+            >
               {userProfile.name ? userProfile.name.charAt(0).toUpperCase() : 'M'}
             </div>
 
@@ -363,13 +381,25 @@ export const ProfileDashboardView: React.FC<ProfileDashboardViewProps> = ({
                     type="text"
                     value={tempName}
                     onChange={(e) => setTempName(e.target.value)}
-                    className="px-3 py-1.5 rounded-xl bg-neutral-800 border border-neutral-700 text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className={`px-3 py-1.5 rounded-xl border text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                      isBright
+                        ? 'bg-white border-black text-black'
+                        : isDark
+                        ? 'bg-neutral-800 border-neutral-700 text-white'
+                        : 'bg-white border-slate-300 text-slate-900'
+                    }`}
                     placeholder="Enter your name"
                   />
                   <select
                     value={tempGender}
                     onChange={(e) => setTempGender(e.target.value as any)}
-                    className="px-3 py-1.5 rounded-xl bg-neutral-800 border border-neutral-700 text-white text-xs"
+                    className={`px-3 py-1.5 rounded-xl border text-xs ${
+                      isBright
+                        ? 'bg-white border-black text-black'
+                        : isDark
+                        ? 'bg-neutral-800 border-neutral-700 text-white'
+                        : 'bg-white border-slate-300 text-slate-900'
+                    }`}
                   >
                     <option value="brother">Brother</option>
                     <option value="sister">Sister</option>
@@ -380,13 +410,17 @@ export const ProfileDashboardView: React.FC<ProfileDashboardViewProps> = ({
                 </form>
               ) : (
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl sm:text-2xl font-medium font-serif tracking-tight text-white">
+                  <h2
+                    className={`text-xl sm:text-2xl font-bold font-serif tracking-tight ${
+                      isBright ? 'text-black' : isDark ? 'text-white' : 'text-slate-900'
+                    }`}
+                  >
                     {userProfile.gender === 'brother' ? 'Brother' : userProfile.gender === 'sister' ? 'Sister' : ''}{' '}
                     {userProfile.name || 'Faithful Believer'}
                   </h2>
                   <button
                     onClick={() => setIsEditingName(true)}
-                    className="p-1.5 rounded-lg hover:bg-neutral-800 text-emerald-400 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg hover:bg-neutral-800/20 text-emerald-600 dark:text-emerald-400 transition-colors cursor-pointer"
                     title="Edit Profile Name"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
@@ -394,17 +428,37 @@ export const ProfileDashboardView: React.FC<ProfileDashboardViewProps> = ({
                 </div>
               )}
 
-              <p className="text-xs text-neutral-400 mt-0.5">
+              <p
+                className={`text-xs mt-0.5 ${
+                  isBright ? 'text-black font-medium' : isDark ? 'text-neutral-400' : 'text-slate-600 font-medium'
+                }`}
+              >
                 Location: {location.city}, {location.country} • {settings.method} Method
               </p>
 
               <div className="flex flex-wrap items-center gap-2 mt-3">
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-950/40 text-amber-300 border border-amber-800/40">
-                  <Flame className="w-3.5 h-3.5 fill-current" />
+                <span
+                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
+                    isBright
+                      ? 'bg-amber-100 text-amber-950 border-amber-400'
+                      : isDark
+                      ? 'bg-amber-950/40 text-amber-300 border-amber-800/40'
+                      : 'bg-amber-50 text-amber-900 border-amber-200'
+                  }`}
+                >
+                  <Flame className="w-3.5 h-3.5 fill-current text-amber-500" />
                   {userProfile.streakDays} Day Prayer Streak
                 </span>
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/60 text-emerald-300 border border-emerald-800/40">
-                  <Award className="w-3.5 h-3.5" />
+                <span
+                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
+                    isBright
+                      ? 'bg-emerald-100 text-emerald-950 border-emerald-400'
+                      : isDark
+                      ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-800/40'
+                      : 'bg-emerald-50 text-emerald-900 border-emerald-200'
+                  }`}
+                >
+                  <Award className="w-3.5 h-3.5 text-emerald-600" />
                   {totalPrayersLogged} Prayers Recorded
                 </span>
                 {onOpenAccountSyncModal && (
@@ -597,16 +651,28 @@ export const ProfileDashboardView: React.FC<ProfileDashboardViewProps> = ({
               </div>
 
               {/* Status Banner */}
-              <div className="p-3 rounded-xl bg-gradient-to-r from-cyan-950/50 via-neutral-900 to-neutral-950 border border-cyan-800/40 space-y-1.5">
+              <div
+                className={`p-3 rounded-xl border space-y-1.5 ${
+                  isBright
+                    ? 'bg-slate-50 border-2 border-slate-900 text-black'
+                    : isDark
+                    ? 'bg-gradient-to-r from-cyan-950/50 via-neutral-900 to-neutral-950 border border-cyan-800/40 text-neutral-200'
+                    : 'bg-cyan-50/80 border border-cyan-200 text-slate-900'
+                }`}
+              >
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-neutral-300 font-medium">Protection Status:</span>
-                  <span className="font-bold text-cyan-400">
+                  <span className={`font-semibold ${isBright ? 'text-black' : isDark ? 'text-neutral-300' : 'text-slate-800'}`}>
+                    Protection Status:
+                  </span>
+                  <span className="font-bold text-cyan-600 dark:text-cyan-400">
                     {(userProfile.manzilTotalCompletions || 0) > 0 ? '🛡️ Ruqyah Recorded' : 'Not recited yet'}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-neutral-400">
-                  <span>Last Recited:</span>
-                  <span className="font-mono text-neutral-300">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className={isBright ? 'text-slate-800 font-medium' : isDark ? 'text-neutral-400' : 'text-slate-600'}>
+                    Last Recited:
+                  </span>
+                  <span className={`font-mono font-semibold ${isBright ? 'text-black' : isDark ? 'text-neutral-300' : 'text-slate-800'}`}>
                     {userProfile.manzilLastReadAt
                       ? new Date(userProfile.manzilLastReadAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
                       : 'Never'}
@@ -1099,15 +1165,35 @@ export const ProfileDashboardView: React.FC<ProfileDashboardViewProps> = ({
         </div>
 
         {/* Spiritual Consistency Index & Motivation Footer */}
-        <div className="p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div
+          className={`p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+            isBright
+              ? 'bg-white border-2 border-slate-900 text-black shadow-xs'
+              : isDark
+              ? 'bg-neutral-950/60 border-neutral-800 text-white'
+              : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+          }`}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-950 to-neutral-900 border border-emerald-700/50 flex flex-col items-center justify-center text-center shrink-0">
-              <span className="text-xs font-bold font-mono text-emerald-400 leading-none">{spiritualConsistencyScore}%</span>
-              <span className="text-[8px] text-neutral-400 uppercase font-semibold mt-0.5">Score</span>
+            <div
+              className={`w-12 h-12 rounded-2xl border flex flex-col items-center justify-center text-center shrink-0 ${
+                isBright
+                  ? 'bg-slate-100 border-2 border-slate-900 text-black'
+                  : isDark
+                  ? 'bg-gradient-to-br from-emerald-950 to-neutral-900 border-emerald-700/50 text-emerald-400'
+                  : 'bg-emerald-100 border border-emerald-300 text-emerald-950'
+              }`}
+            >
+              <span className="text-xs font-bold font-mono leading-none">{spiritualConsistencyScore}%</span>
+              <span className="text-[8px] uppercase font-semibold mt-0.5 opacity-80">Score</span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-white">
+                <span
+                  className={`text-xs font-bold ${
+                    isBright ? 'text-black' : isDark ? 'text-white' : 'text-slate-900'
+                  }`}
+                >
                   {spiritualConsistencyScore >= 90
                     ? '🌟 Mumtaz (Outstanding Devotion)'
                     : spiritualConsistencyScore >= 75
@@ -1430,8 +1516,10 @@ export const ProfileDashboardView: React.FC<ProfileDashboardViewProps> = ({
           <Sparkles className="w-5 h-5 text-emerald-400" />
           Color Theme & Visual Style
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* 1. Light Theme */}
           <button
+            id="theme-select-light"
             onClick={() => onUpdateProfile({ theme: 'emerald-light' })}
             className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
               userProfile.theme === 'emerald-light'
@@ -1442,18 +1530,44 @@ export const ProfileDashboardView: React.FC<ProfileDashboardViewProps> = ({
             <div className="flex items-center justify-between mb-1.5">
               <span className="font-semibold text-sm text-white flex items-center gap-1.5">
                 <Sun className="w-4 h-4 text-emerald-400" />
-                White & Emerald Green
+                Light (White & Green)
               </span>
               {userProfile.theme === 'emerald-light' && (
                 <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-600 text-white font-bold">Active</span>
               )}
             </div>
             <p className="text-xs text-neutral-400">
-              Clean white & mint background with lush forest emerald accents and deep readable typography
+              Clean white & mint background with gentle emerald accents and balanced contrast for daily reading.
             </p>
           </button>
 
+          {/* 2. Bright Theme (High Contrast for Seniors) */}
           <button
+            id="theme-select-bright"
+            onClick={() => onUpdateProfile({ theme: 'bright' })}
+            className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+              userProfile.theme === 'bright'
+                ? 'bg-emerald-950/60 border-emerald-600 text-white ring-2 ring-emerald-500'
+                : 'bg-neutral-950/60 border-neutral-800 text-neutral-400 hover:border-neutral-700'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="font-bold text-sm text-white flex items-center gap-1.5">
+                <Eye className="w-4 h-4 text-emerald-400 font-bold" />
+                Bright (Easy to Read)
+              </span>
+              {userProfile.theme === 'bright' && (
+                <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-600 text-white font-bold">Active</span>
+              )}
+            </div>
+            <p className="text-xs text-neutral-400">
+              Ultra-high contrast, crisp pure white with bold jet-black text & dark borders. Perfect for elders and low vision.
+            </p>
+          </button>
+
+          {/* 3. Dark Theme */}
+          <button
+            id="theme-select-dark"
             onClick={() => onUpdateProfile({ theme: 'dark' })}
             className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
               userProfile.theme === 'dark' || userProfile.theme === 'emerald-dark'
@@ -1464,14 +1578,14 @@ export const ProfileDashboardView: React.FC<ProfileDashboardViewProps> = ({
             <div className="flex items-center justify-between mb-1.5">
               <span className="font-semibold text-sm text-white flex items-center gap-1.5">
                 <Moon className="w-4 h-4 text-emerald-400" />
-                Elegant Dark (Midnight Emerald)
+                Dark (Night Mode)
               </span>
               {(userProfile.theme === 'dark' || userProfile.theme === 'emerald-dark') && (
                 <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-600 text-white font-bold">Active</span>
               )}
             </div>
             <p className="text-xs text-neutral-400">
-              Deep black & dark charcoal surfaces with glowing emerald jewel highlights
+              Deep black & dark charcoal surfaces with glowing emerald jewel highlights for nighttime recitation.
             </p>
           </button>
         </div>

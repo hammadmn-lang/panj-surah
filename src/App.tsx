@@ -222,8 +222,12 @@ export function App() {
         const parsed = JSON.parse(saved);
         if (parsed.email === 'hammadmn@gmail.com') {
           parsed.email = 'hammadmn99@gmail.com';
-          localStorage.setItem('panj_surah_profile', JSON.stringify(parsed));
         }
+        // User requested default theme to be lite green and white
+        if (parsed.theme === 'dark' || parsed.theme === 'emerald-dark' || !parsed.theme) {
+          parsed.theme = 'emerald-light';
+        }
+        localStorage.setItem('panj_surah_profile', JSON.stringify(parsed));
         return parsed;
       }
       return DEFAULT_PROFILE;
@@ -349,10 +353,13 @@ export function App() {
   // Sync theme to root html
   useEffect(() => {
     const root = document.documentElement;
-    if (userProfile.theme === 'dark') {
+    root.classList.remove('dark', 'theme-bright', 'theme-light');
+    if (userProfile.theme === 'dark' || userProfile.theme === 'emerald-dark') {
       root.classList.add('dark');
+    } else if (userProfile.theme === 'bright') {
+      root.classList.add('theme-bright');
     } else {
-      root.classList.remove('dark');
+      root.classList.add('theme-light');
     }
   }, [userProfile.theme]);
 
@@ -460,7 +467,12 @@ export function App() {
   };
 
   const handleToggleTheme = () => {
-    const nextTheme = userProfile.theme === 'emerald-light' ? 'dark' : 'emerald-light';
+    const nextTheme =
+      userProfile.theme === 'emerald-light'
+        ? 'bright'
+        : userProfile.theme === 'bright'
+        ? 'dark'
+        : 'emerald-light';
     handleUpdateProfile({ theme: nextTheme });
   };
 
@@ -639,7 +651,15 @@ export function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-200 transition-colors duration-200 flex flex-col font-sans">
+    <div
+      className={`min-h-screen transition-colors duration-200 flex flex-col font-sans ${
+        userProfile.theme === 'dark' || userProfile.theme === 'emerald-dark'
+          ? 'dark bg-neutral-950 text-neutral-200'
+          : userProfile.theme === 'bright'
+          ? 'theme-bright bg-white text-black font-medium antialiased'
+          : 'bg-[#f8faf8] text-slate-800'
+      }`}
+    >
       {/* Top Header Navbar */}
       <Navbar
         activeTab={activeTab}
@@ -802,7 +822,7 @@ export function App() {
       {/* Bottom Mobile Tab Bar (Applet iOS/Android experience) */}
       <nav
         id="mobile-tab-bar"
-        className="fixed bottom-0 left-0 right-0 z-40 bg-neutral-900/95 backdrop-blur-md border-t border-neutral-800 py-1.5 px-2 flex md:hidden items-center justify-around shadow-2xl"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 border-t border-emerald-200/80 backdrop-blur-md py-1.5 px-2 flex md:hidden items-center justify-around shadow-2xl dark:bg-neutral-900/95 dark:border-neutral-800"
       >
         {navTabs.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -813,11 +833,15 @@ export function App() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all cursor-pointer ${
                 isActive
-                  ? 'text-emerald-400 font-bold scale-105'
-                  : 'text-neutral-500 hover:text-neutral-300 font-medium'
+                  ? 'text-emerald-700 dark:text-emerald-400 font-bold scale-105'
+                  : 'text-slate-500 hover:text-emerald-700 dark:text-neutral-500 dark:hover:text-neutral-300 font-medium'
               }`}
             >
-              <div className={`p-1.5 rounded-xl ${isActive ? 'bg-emerald-950/70 text-emerald-400' : ''}`}>
+              <div
+                className={`p-1.5 rounded-xl ${
+                  isActive ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-400' : ''
+                }`}
+              >
                 {tab.icon}
               </div>
               <span className="text-[10px] mt-0.5 whitespace-nowrap">{tab.label}</span>
@@ -864,6 +888,10 @@ export function App() {
         userProfile={userProfile}
         onUpdateProfile={handleUpdateProfile}
         onClose={() => setIsSyncModalOpen(false)}
+        onSuccessLogon={() => {
+          setIsSyncModalOpen(false);
+          setActiveTab('prayers');
+        }}
       />
 
       {/* 3-Day Internet Connection & Prayer Times Update Modal */}

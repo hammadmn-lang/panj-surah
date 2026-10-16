@@ -20,10 +20,12 @@ import {
   ExternalLink,
   Layers,
   ArrowRight,
+  FileText,
 } from 'lucide-react';
 import { Surah, UserProfile } from '../types';
 import { SURAHS_DATA } from '../data/surahs';
 import { downloadSurahAudio, getCachedAudioBlobUrl, isSurahCached, removeCachedSurah } from '../utils/audioCache';
+import { SurahPdfViewerModal } from './SurahPdfViewerModal';
 import confetti from 'canvas-confetti';
 
 interface SurahsViewProps {
@@ -35,6 +37,7 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
   const [activeFilter, setActiveFilter] = useState<'panj' | 'beginner' | 'all'>('panj');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSurah, setSelectedSurah] = useState<Surah | null>(null);
+  const [pdfModalSurah, setPdfModalSurah] = useState<Surah | null>(null);
 
   // Audio Player State
   const [isPlaying, setIsPlaying] = useState(false);
@@ -56,6 +59,19 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
   const [translationLanguage, setTranslationLanguage] = useState<'both' | 'ur' | 'en'>(
     userProfile.surahTranslationLang || (userProfile.language === 'ur' ? 'ur' : 'both')
   );
+
+  // 11 Ayat per page Mushaf pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const AYAT_PER_PAGE = 11;
+  const isAllTranslationsOff = !showTranslation && !showTransliteration;
+
+  // Auto set font to 14 when all translations are switched off
+  useEffect(() => {
+    if (isAllTranslationsOff) {
+      setFontSize(14);
+      setCurrentPage(1);
+    }
+  }, [isAllTranslationsOff]);
 
   // Check offline cache on mount
   useEffect(() => {
@@ -210,36 +226,47 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
               </p>
             </div>
 
-            {/* Read / Memorized Toggle */}
-            <button
-              id="mark-surah-completed-btn"
-              onClick={() => {
-                const wasCompleted = userProfile.completedSurahIds.includes(selectedSurah.id);
-                onToggleSurahCompleted(selectedSurah.id, {
-                  name: selectedSurah.nameTransliteration,
-                  arabic: selectedSurah.nameArabic,
-                });
-                if (!wasCompleted) {
-                  try {
-                    confetti({
-                      particleCount: 70,
-                      spread: 60,
-                      origin: { y: 0.6 },
-                    });
-                  } catch {
-                    // Ignore
+            {/* PDF View & Read / Memorized Toggle */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPdfModalSurah(selectedSurah)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition-all cursor-pointer dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/60"
+                title="Open Big Surah in In-App Printable PDF Mushaf"
+              >
+                <FileText className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                <span>Open as PDF</span>
+              </button>
+
+              <button
+                id="mark-surah-completed-btn"
+                onClick={() => {
+                  const wasCompleted = userProfile.completedSurahIds.includes(selectedSurah.id);
+                  onToggleSurahCompleted(selectedSurah.id, {
+                    name: selectedSurah.nameTransliteration,
+                    arabic: selectedSurah.nameArabic,
+                  });
+                  if (!wasCompleted) {
+                    try {
+                      confetti({
+                        particleCount: 70,
+                        spread: 60,
+                        origin: { y: 0.6 },
+                      });
+                    } catch {
+                      // Ignore
+                    }
                   }
-                }
-              }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                userProfile.completedSurahIds.includes(selectedSurah.id)
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-              }`}
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>{userProfile.completedSurahIds.includes(selectedSurah.id) ? 'Memorized / Read (+Profile Stat)' : 'Mark as Read (+Profile Stat)'}</span>
-            </button>
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  userProfile.completedSurahIds.includes(selectedSurah.id)
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                }`}
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>{userProfile.completedSurahIds.includes(selectedSurah.id) ? 'Memorized / Read' : 'Mark as Read'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Reader Preferences Bar */}
@@ -249,7 +276,7 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
               <Type className="w-4 h-4 text-neutral-400" />
               <span className="font-medium text-neutral-300">Arabic Size:</span>
               <button
-                onClick={() => setFontSize((f) => Math.max(20, f - 2))}
+                onClick={() => setFontSize((f) => Math.max(12, f - 2))}
                 className="px-2 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold"
               >
                 -
@@ -262,6 +289,31 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
                 +
               </button>
             </div>
+
+            {/* Quick 11 Ayat / Page (Arabic Only) Mode Toggle */}
+            <button
+              onClick={() => {
+                if (isAllTranslationsOff) {
+                  setShowTranslation(true);
+                  setShowTransliteration(true);
+                  setFontSize(28);
+                } else {
+                  setShowTranslation(false);
+                  setShowTransliteration(false);
+                  setFontSize(14);
+                  setCurrentPage(1);
+                }
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                isAllTranslationsOff
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'bg-emerald-100 text-emerald-900 border border-emerald-300 hover:bg-emerald-200 dark:bg-neutral-800 dark:text-neutral-300'
+              }`}
+              title="When all translations are switched off, default font is 14 and exactly 11 ayat per page are displayed"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>{isAllTranslationsOff ? '📖 11 Ayat/Page Active (Font 14)' : '📖 Switch to 11 Ayat/Page (No Translation)'}</span>
+            </button>
 
             {/* Toggle Transliteration & Translation & Translation Language */}
             <div className="flex flex-wrap items-center gap-2">
@@ -447,60 +499,180 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
             </div>
           )}
 
-          {/* Verses List */}
-          <div className="space-y-4 pt-2">
-            {selectedSurah.verses.map((verse) => (
-              <div
-                key={verse.id}
-                id={`verse-${selectedSurah.id}-${verse.number}`}
-                className="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800 space-y-3 transition-colors hover:border-neutral-700 shadow-sm"
-              >
-                {/* Verse Number Badge & Arabic Text */}
-                <div className="flex items-start justify-between gap-4">
-                  <span className="w-8 h-8 rounded-full bg-neutral-800 text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0 border border-neutral-700">
-                    {verse.number}
-                  </span>
+          {/* Verses Content: 11 Ayat/Page Mushaf Mode when translations off, OR full continuous translated list */}
+          {isAllTranslationsOff ? (
+            (() => {
+              const totalPages = Math.ceil(selectedSurah.verses.length / AYAT_PER_PAGE);
+              const startIdx = (currentPage - 1) * AYAT_PER_PAGE;
+              const endIdx = Math.min(startIdx + AYAT_PER_PAGE, selectedSurah.verses.length);
+              const currentVerses = selectedSurah.verses.slice(startIdx, endIdx);
 
-                  <div
-                    className="font-arabic text-right text-neutral-100 flex-1 leading-loose"
-                    style={{ fontSize: `${fontSize}px` }}
-                    dir="rtl"
-                  >
-                    {verse.textArabic}
+              return (
+                <div className="space-y-5 pt-2">
+                  {/* Top Pagination Control Bar */}
+                  <div className="p-3.5 rounded-2xl bg-white border border-emerald-200/90 flex flex-wrap items-center justify-between gap-3 shadow-xs dark:bg-neutral-900/90 dark:border-neutral-800">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage <= 1}
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-900 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center gap-1.5 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      <span>Prev 11 Ayat</span>
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-emerald-950 dark:text-emerald-400">
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      <span className="text-[11px] text-slate-500 font-mono">
+                        (Ayat {startIdx + 1} – {endIdx})
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {/* Jump to page selector */}
+                      <select
+                        value={currentPage}
+                        onChange={(e) => setCurrentPage(Number(e.target.value))}
+                        className="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-900 border border-emerald-200 text-xs font-semibold cursor-pointer dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-700"
+                        title="Jump to page"
+                      >
+                        {Array.from({ length: totalPages }).map((_, i) => (
+                          <option key={i + 1} value={i + 1}>
+                            Page {i + 1} (Ayat {i * 11 + 1}–{Math.min((i + 1) * 11, selectedSurah.verses.length)})
+                          </option>
+                        ))}
+                      </select>
+
+                      <button
+                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={currentPage >= totalPages}
+                        className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-900 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center gap-1.5 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700"
+                      >
+                        <span>Next 11 Ayat</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Mushaf Page Container (11 Ayat styled at font size 14) */}
+                  <div className="bg-white rounded-3xl border-2 border-emerald-600/30 p-6 sm:p-9 shadow-md relative dark:bg-neutral-900/90 dark:border-emerald-800/50">
+                    <div className="border-b border-emerald-200/60 pb-3 mb-6 flex items-center justify-between text-xs text-emerald-900 font-bold dark:text-emerald-400">
+                      <span>سُورَةُ {selectedSurah.nameArabic}</span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-800 font-mono dark:bg-neutral-800 dark:text-neutral-300">
+                        11 Ayat / Page Mode (Font: {fontSize}px)
+                      </span>
+                      <span>{selectedSurah.nameTransliteration}</span>
+                    </div>
+
+                    <div
+                      className="font-arabic text-right text-slate-900 leading-[2.5] space-y-3 dark:text-neutral-100"
+                      dir="rtl"
+                      style={{ fontSize: `${fontSize}px` }}
+                    >
+                      {currentVerses.map((verse) => (
+                        <span key={verse.id} className="inline ml-2.5">
+                          <span className="font-normal text-slate-900 dark:text-neutral-100">
+                            {verse.textArabic}
+                          </span>
+                          <span className="inline-flex items-center justify-center mx-1.5 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-xs font-mono font-bold border border-emerald-300 select-none dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800">
+                            ۝ {verse.number}
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="mt-8 pt-3 border-t border-emerald-200/60 flex items-center justify-between text-xs text-slate-500 dark:text-neutral-400">
+                      <span>Panj Surah Sacred Mushaf</span>
+                      <span className="font-bold text-emerald-800 bg-emerald-50 px-3 py-0.5 rounded-full border border-emerald-200 dark:bg-neutral-800 dark:text-emerald-400 dark:border-neutral-700">
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      <span>الجزء {selectedSurah.nameArabic}</span>
+                    </div>
+                  </div>
+
+                  {/* Bottom Pagination Bar */}
+                  <div className="p-3.5 rounded-2xl bg-white border border-emerald-200/90 flex flex-wrap items-center justify-between gap-3 shadow-xs dark:bg-neutral-900/90 dark:border-neutral-800">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage <= 1}
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-900 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center gap-1.5 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      <span>Prev 11 Ayat</span>
+                    </button>
+
+                    <span className="text-xs font-bold text-emerald-950 dark:text-emerald-400">
+                      Page {currentPage} of {totalPages}
+                    </span>
+
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage >= totalPages}
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-900 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center gap-1.5 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700"
+                    >
+                      <span>Next 11 Ayat</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
+              );
+            })()
+          ) : (
+            <div className="space-y-4 pt-2">
+              {selectedSurah.verses.map((verse) => (
+                <div
+                  key={verse.id}
+                  id={`verse-${selectedSurah.id}-${verse.number}`}
+                  className="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800 space-y-3 transition-colors hover:border-neutral-700 shadow-sm"
+                >
+                  {/* Verse Number Badge & Arabic Text */}
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="w-8 h-8 rounded-full bg-neutral-800 text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0 border border-neutral-700">
+                      {verse.number}
+                    </span>
 
-                {/* Transliteration */}
-                {showTransliteration && (
-                  <div className="text-xs sm:text-sm text-emerald-400 font-medium italic pl-10 leading-relaxed">
-                    {verse.transliteration}
+                    <div
+                      className="font-arabic text-right text-neutral-100 flex-1 leading-loose"
+                      style={{ fontSize: `${fontSize}px` }}
+                      dir="rtl"
+                    >
+                      {verse.textArabic}
+                    </div>
                   </div>
-                )}
 
-                {/* Translations (Urdu / English / Both) */}
-                {showTranslation && (
-                  <div className="space-y-2 pl-2 sm:pl-10">
-                    {/* Urdu Translation */}
-                    {(translationLanguage === 'ur' || translationLanguage === 'both') && verse.translationUr && (
-                      <div
-                        className="text-sm sm:text-base text-emerald-300/95 font-urdu text-right leading-loose bg-neutral-950/40 p-2.5 rounded-xl border border-neutral-800/80"
-                        dir="rtl"
-                      >
-                        {verse.translationUr}
-                      </div>
-                    )}
+                  {/* Transliteration */}
+                  {showTransliteration && (
+                    <div className="text-xs sm:text-sm text-emerald-400 font-medium italic pl-10 leading-relaxed">
+                      {verse.transliteration}
+                    </div>
+                  )}
 
-                    {/* English Translation */}
-                    {(translationLanguage === 'en' || translationLanguage === 'both') && (
-                      <div className="text-xs sm:text-sm text-neutral-300 leading-relaxed font-normal">
-                        {verse.translation}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+                  {/* Translations (Urdu / English / Both) */}
+                  {showTranslation && (
+                    <div className="space-y-2 pl-2 sm:pl-10">
+                      {/* Urdu Translation */}
+                      {(translationLanguage === 'ur' || translationLanguage === 'both') && verse.translationUr && (
+                        <div
+                          className="text-sm sm:text-base text-emerald-300/95 font-urdu text-right leading-loose bg-neutral-950/40 p-2.5 rounded-xl border border-neutral-800/80"
+                          dir="rtl"
+                        >
+                          {verse.translationUr}
+                        </div>
+                      )}
+
+                      {/* English Translation */}
+                      {(translationLanguage === 'en' || translationLanguage === 'both') && (
+                        <div className="text-xs sm:text-sm text-neutral-300 leading-relaxed font-normal">
+                          {verse.translation}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Bottom Completion Button */}
           <div className="text-center pt-6 border-t border-neutral-800">
@@ -696,7 +868,20 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
                         </button>
                       )}
 
-                      <div className="font-semibold text-emerald-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                      {/* Open as PDF Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPdfModalSurah(surah);
+                        }}
+                        className="px-2 py-1 rounded-lg text-emerald-900 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 transition-colors flex items-center gap-1 text-[11px] font-bold cursor-pointer dark:bg-neutral-800 dark:text-emerald-300 dark:border-neutral-700"
+                        title="Open Surah in In-App PDF Mushaf Reader"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
+                        <span>PDF</span>
+                      </button>
+
+                      <div className="font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                         Read & Listen <ArrowRight className="w-3.5 h-3.5" />
                       </div>
                     </div>
@@ -707,6 +892,13 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
           </div>
         </>
       )}
+
+      {/* In-App PDF Mushaf Viewer Modal for Big Surahs */}
+      <SurahPdfViewerModal
+        surah={pdfModalSurah}
+        isOpen={!!pdfModalSurah}
+        onClose={() => setPdfModalSurah(null)}
+      />
     </div>
   );
 };

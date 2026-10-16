@@ -34,20 +34,20 @@ export const HijriAdjustmentModal: React.FC<HijriAdjustmentModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
       <div
         id="hijri-adjustment-modal"
-        className="bg-neutral-900 border border-neutral-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl transition-all"
+        className="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 text-slate-900 dark:text-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl transition-all"
       >
         {/* Header */}
-        <div className="p-6 border-b border-neutral-800 flex items-center justify-between bg-neutral-950/40">
+        <div className="p-6 border-b border-slate-200 dark:border-neutral-800 flex items-center justify-between bg-slate-50 dark:bg-neutral-950/40">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-950/80 border border-emerald-800/80 flex items-center justify-center text-emerald-400">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800/80 flex items-center justify-center text-emerald-800 dark:text-emerald-400">
               <Moon className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold font-serif text-white flex items-center gap-2">
+              <h3 className="text-lg font-bold font-serif text-slate-900 dark:text-white flex items-center gap-2">
                 Islamic Hijri Calendar Sighting
               </h3>
-              <p className="text-xs text-neutral-400">
-                Regional moon sighting & Google local date synchronization
+              <p className="text-xs text-slate-600 dark:text-neutral-400">
+                Regional moon sighting &amp; Google local date synchronization
               </p>
             </div>
           </div>
@@ -55,7 +55,7 @@ export const HijriAdjustmentModal: React.FC<HijriAdjustmentModalProps> = ({
           <button
             id="close-hijri-modal-btn"
             onClick={onClose}
-            className="p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer"
+            className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -63,32 +63,32 @@ export const HijriAdjustmentModal: React.FC<HijriAdjustmentModalProps> = ({
 
         {/* Current Active Date Showcase */}
         <div className="p-6 space-y-5">
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-950/50 via-neutral-950 to-neutral-900 border border-emerald-800/40 text-center relative overflow-hidden">
+          <div className="p-5 rounded-2xl bg-emerald-50/90 dark:bg-gradient-to-br dark:from-emerald-950/50 dark:via-neutral-950 dark:to-neutral-900 border border-emerald-200 dark:border-emerald-800/40 text-center relative overflow-hidden">
             <div className="flex items-center justify-center gap-2 mb-1">
-              <span className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">
+              <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
                 Current Islamic Date ({location.city}, {location.country})
               </span>
             </div>
 
-            <div className="text-2xl sm:text-3xl font-bold font-serif text-white tracking-tight my-1">
+            <div className="text-2xl sm:text-3xl font-bold font-serif text-slate-900 dark:text-white tracking-tight my-1">
               {hijriDate.formattedEn}
             </div>
 
-            <div className="text-lg font-arabic text-emerald-300 my-0.5">
-              {hijriDate.formattedAr} • <span className="font-sans font-medium text-sm text-neutral-300">{hijriDate.formattedUr}</span>
+            <div className="text-lg font-arabic text-emerald-800 dark:text-emerald-300 my-0.5 font-bold">
+              {hijriDate.formattedAr} • <span className="font-sans font-medium text-sm text-slate-700 dark:text-neutral-300">{hijriDate.formattedUr}</span>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-3 text-xs text-neutral-400">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-neutral-900 border border-neutral-700 text-neutral-300">
-                <Globe className="w-3 h-3 text-emerald-400" />
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-3 text-xs text-slate-600 dark:text-neutral-400">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-700 text-slate-800 dark:text-neutral-300 font-medium">
+                <Globe className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                 {hijriDate.sightingStandard || `${location.country} Sighting`}
               </span>
               {hijriDate.isAfterMaghrib && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-950/70 border border-amber-800/60 text-amber-300 font-medium">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-800/60 text-amber-900 dark:text-amber-300 font-semibold">
                   🌙 Maghrib Passed (Night of {hijriDate.day} {hijriDate.monthNameEn})
                 </span>
               )}
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-neutral-900 border border-neutral-700 text-neutral-300">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-700 text-slate-800 dark:text-neutral-300 font-medium">
                 {hijriDate.source === 'live_google_aladhan'
                   ? '🌐 Google/Aladhan Synced'
                   : hijriDate.source === 'regional_ruet'

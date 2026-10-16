@@ -93,6 +93,8 @@ export interface DuroodItem {
   virtues: string[];
   reference: string;
   recommendedCount: number;
+  isBigger?: boolean;
+  pdfPages?: number;
 }
 
 export type DuaCategory =
@@ -220,7 +222,7 @@ export interface UserProfile {
   customDhikrs: TasbeehDhikr[];
   language: 'en' | 'ur' | 'ar' | 'tr' | 'id' | 'fr';
   surahTranslationLang: 'en' | 'ur' | 'both';
-  theme: 'emerald-light' | 'emerald-dark' | 'dark';
+  theme: 'emerald-light' | 'emerald-dark' | 'dark' | 'bright';
   fontSizeArabic: number;
   showTransliteration: boolean;
   showTranslation: boolean;

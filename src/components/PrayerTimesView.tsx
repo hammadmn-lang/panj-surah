@@ -102,6 +102,9 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
   const [deviceClockInfo, setDeviceClockInfo] = useState(getLocalDeviceClockInfo());
   const [hasPromptedExpiredOnce, setHasPromptedExpiredOnce] = useState(false);
 
+  const isDark = userProfile.theme === 'dark' || userProfile.theme === 'emerald-dark';
+  const isBright = userProfile.theme === 'bright';
+
   const activeSyncStatus = propSyncStatus || localSyncStatus;
   const isModalOpen = isInternetUpdateModalOpen !== undefined ? isInternetUpdateModalOpen : internalUpdateModalOpen;
 
@@ -398,37 +401,89 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
       {/* Local Device Clock, Date & Location Settings Bar (Ensures Offline Accuracy) */}
       <div
         id="device-clock-offline-status-bar"
-        className="bg-neutral-900/90 rounded-2xl p-3 sm:p-4 border border-neutral-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+        className={`rounded-2xl p-3 sm:p-4 border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition-all ${
+          isBright
+            ? 'bg-white border-2 border-black text-black shadow-md'
+            : isDark
+            ? 'bg-neutral-900/90 border-neutral-800 text-neutral-200'
+            : 'bg-white border-2 border-emerald-200 text-slate-800 shadow-sm'
+        }`}
       >
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-950 border border-neutral-800 text-neutral-200 font-mono font-bold">
-            <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <div
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border font-mono font-bold ${
+              isBright
+                ? 'bg-slate-100 border-black text-black'
+                : isDark
+                ? 'bg-neutral-950 border-neutral-800 text-neutral-200'
+                : 'bg-emerald-50 border-emerald-200 text-emerald-950'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>
               {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
             </span>
-            <span className="text-[10px] text-neutral-400 font-normal hidden md:inline">
+            <span
+              className={`text-[10px] font-semibold hidden md:inline ${
+                isBright ? 'text-black' : isDark ? 'text-neutral-400' : 'text-slate-600'
+              }`}
+            >
               (Device Clock)
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-950 border border-neutral-800 text-neutral-300">
-            <Calendar className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+          <div
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border font-semibold ${
+              isBright
+                ? 'bg-slate-100 border-black text-black'
+                : isDark
+                ? 'bg-neutral-950 border-neutral-800 text-neutral-300'
+                : 'bg-emerald-50 border-emerald-200 text-slate-800'
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
             <span>
               {currentTime.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-950 border border-neutral-800 text-neutral-400 hidden lg:flex">
-            <span className="text-[11px] font-mono text-neutral-300">{deviceClockInfo.timeZone}</span>
-            <span className="text-[10px] text-neutral-500">({deviceClockInfo.gmtString})</span>
+          <div
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border hidden lg:flex ${
+              isBright
+                ? 'bg-slate-100 border-black text-black'
+                : isDark
+                ? 'bg-neutral-950 border-neutral-800 text-neutral-400'
+                : 'bg-emerald-50 border-emerald-200 text-slate-700'
+            }`}
+          >
+            <span
+              className={`text-[11px] font-mono font-bold ${
+                isBright ? 'text-black' : isDark ? 'text-neutral-300' : 'text-slate-800'
+              }`}
+            >
+              {deviceClockInfo.timeZone}
+            </span>
+            <span
+              className={`text-[10px] font-medium ${
+                isBright ? 'text-neutral-700' : isDark ? 'text-neutral-500' : 'text-slate-600'
+              }`}
+            >
+              ({deviceClockInfo.gmtString})
+            </span>
           </div>
 
           <button
             onClick={onOpenLocationModal}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-emerald-400 transition-colors cursor-pointer"
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border transition-colors cursor-pointer font-bold ${
+              isBright
+                ? 'bg-slate-100 hover:bg-slate-200 border-black text-black'
+                : isDark
+                ? 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-300 hover:text-emerald-400'
+                : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-950'
+            }`}
             title="Active Location Setting (Click to change)"
           >
-            <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span className="truncate max-w-[130px] sm:max-w-[200px]">
               {location.isAuto ? 'GPS Setting (Auto)' : `${location.city}, ${location.country}`}
             </span>
@@ -437,31 +492,45 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
 
         {/* Offline Guarantee and 3-Day Sync State Chip */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-950/60 border border-emerald-800/40 text-emerald-300 text-[11px] font-medium">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <div
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-[11px] font-bold ${
+              isBright
+                ? 'bg-slate-100 border-black text-black'
+                : isDark
+                ? 'bg-emerald-950/60 border-emerald-800/40 text-emerald-300'
+                : 'bg-emerald-50 border-emerald-200 text-emerald-900'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span className="hidden sm:inline">Offline Reliable</span>
-            <span className="text-[10px] text-emerald-400/80 font-mono">3d Saved</span>
+            <span className="text-[10px] font-mono opacity-90">3d Saved</span>
           </div>
 
           {activeSyncStatus.isExpired ? (
             <button
               onClick={handleOpenModal}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-950/90 border border-amber-500/80 text-amber-300 font-bold text-[11px] animate-pulse hover:bg-amber-900 transition-all cursor-pointer shadow-md shadow-amber-950/40"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500 border border-amber-600 text-white font-bold text-[11px] animate-pulse hover:bg-amber-600 transition-all cursor-pointer shadow-md"
               title="3-Day window expired. Connect to internet to update prayer times."
             >
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <AlertTriangle className="w-3.5 h-3.5 text-white shrink-0" />
               <span>Update Required (3d)</span>
             </button>
           ) : (
             <button
               onClick={handleOpenModal}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-neutral-200 text-[11px] transition-colors cursor-pointer"
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-[11px] font-bold transition-colors cursor-pointer ${
+                isBright
+                  ? 'bg-slate-100 hover:bg-slate-200 border-black text-black'
+                  : isDark
+                  ? 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 text-neutral-400 hover:text-neutral-200'
+                  : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-slate-800'
+              }`}
               title="Click to check 3-day sync schedule details"
             >
               {activeSyncStatus.isOnline ? (
-                <Wifi className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <Wifi className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               ) : (
-                <WifiOff className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                <WifiOff className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
               )}
               <span>{activeSyncStatus.isOnline ? 'Online' : 'Offline'}</span>
             </button>
@@ -603,52 +672,165 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
         </div>
 
         {/* Dual Cards: Current Time (Clock) and Next/Active Prayer */}
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
+        <div className="flex flex-wrap sm:flex-nowrap items-stretch gap-3">
           {/* Card 1: Live Hardware Clock */}
-          <div className="flex-1 sm:flex-initial bg-neutral-900/90 p-3.5 sm:p-4 rounded-2xl border border-neutral-800 shadow-xl text-left min-w-[170px]">
-            <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider mb-0.5 flex items-center gap-1.5 font-mono">
-              <Clock className="w-3 h-3 text-emerald-400" />
-              Current Time ({location.city})
-            </p>
-            <p className="text-2xl sm:text-3xl font-mono font-bold text-white tracking-tight">
-              {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
-            </p>
-            <p className="text-[10px] text-emerald-400 font-medium mt-0.5 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Active: {prayerItems.find((p) => p.isCurrent)?.name || 'Isha'} Prayer
+          <div
+            id="current-clock-card"
+            className={`flex-1 sm:flex-initial p-4 rounded-2xl border shadow-lg text-left min-w-[180px] flex flex-col justify-between transition-all ${
+              isBright
+                ? 'bg-white border-2 border-slate-900 text-black shadow-md'
+                : isDark
+                ? 'bg-neutral-900/95 border border-neutral-700/80 text-white shadow-xl shadow-black/40'
+                : 'bg-white border border-slate-200/90 text-slate-800 shadow-sm'
+            }`}
+          >
+            <div>
+              <p
+                className={`text-[11px] font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5 font-mono ${
+                  isBright ? 'text-black' : isDark ? 'text-neutral-300' : 'text-slate-600'
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <span>Clock ({location.city})</span>
+              </p>
+              <p
+                className={`text-2xl sm:text-3xl font-mono font-extrabold tracking-tight ${
+                  isBright ? 'text-black font-black' : isDark ? 'text-white' : 'text-slate-900'
+                }`}
+              >
+                {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+              </p>
+            </div>
+            <p
+              className={`text-xs font-bold mt-2 flex items-center gap-1.5 pt-1 border-t ${
+                isBright
+                  ? 'text-black border-slate-200'
+                  : isDark
+                  ? 'text-emerald-400 border-neutral-800'
+                  : 'text-emerald-700 border-slate-100'
+              }`}
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <span>Active: {prayerItems.find((p) => p.isCurrent)?.name || 'Isha'} Prayer</span>
             </p>
           </div>
 
-          {/* Card 2: Next Prayer Adhan Card */}
-          <div className="flex-1 sm:flex-initial bg-gradient-to-br from-neutral-900 via-neutral-900 to-emerald-950/40 p-3.5 sm:p-4 rounded-2xl border border-emerald-800/60 shadow-xl text-left min-w-[190px]">
-            <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mb-0.5 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Next Prayer: {nextPrayer.name}
-            </p>
-            <p className="text-2xl sm:text-3xl font-mono font-bold text-white tracking-tight">
-              {nextPrayer.timeFormatted}
-            </p>
-            <p className="text-[10px] text-neutral-400 mt-0.5">
-              {remaining.text} remaining ({nextPrayer.arabicName})
-            </p>
+          {/* Card 2: Next Prayer Adhan Card - Prominent, High-Contrast & Clear */}
+          <div
+            id="next-prayer-highlight-box"
+            className={`flex-1 sm:flex-initial p-4 sm:p-5 rounded-2xl shadow-xl text-left min-w-[210px] flex flex-col justify-between transition-all ${
+              isBright
+                ? 'bg-white border-2 border-black text-black shadow-xl ring-1 ring-black'
+                : isDark
+                ? 'bg-gradient-to-br from-neutral-900 via-emerald-950 to-neutral-900 border-2 border-emerald-400 text-white shadow-2xl shadow-emerald-950/70'
+                : 'bg-gradient-to-br from-emerald-50 via-white to-emerald-100/90 border-2 border-emerald-600 text-emerald-950 shadow-md shadow-emerald-800/10'
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <span
+                  className={`text-xs font-black uppercase tracking-wider flex items-center gap-1.5 px-2.5 py-0.5 rounded-full ${
+                    isBright
+                      ? 'bg-black text-white'
+                      : isDark
+                      ? 'bg-emerald-400 text-neutral-950 font-black'
+                      : 'bg-emerald-700 text-white font-extrabold shadow-xs'
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping shrink-0" />
+                  Next: {nextPrayer.name}
+                </span>
+                <span
+                  className={`text-sm font-arabic font-bold ${
+                    isBright ? 'text-black' : isDark ? 'text-emerald-300' : 'text-emerald-800'
+                  }`}
+                >
+                  {nextPrayer.arabicName}
+                </span>
+              </div>
+
+              {/* Big, Bright, Ultra-Readable Time Digits */}
+              <p
+                className={`text-3xl sm:text-4xl font-mono font-black tracking-normal my-1 ${
+                  isBright
+                    ? 'text-black'
+                    : isDark
+                    ? 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]'
+                    : 'text-emerald-950'
+                }`}
+              >
+                {nextPrayer.timeFormatted}
+              </p>
+            </div>
+
+            {/* High-Visibility Remaining Countdown Badge */}
+            <div className="mt-2 pt-1 border-t border-emerald-500/20 flex items-center justify-between gap-2">
+              <span
+                className={`text-xs font-bold px-2.5 py-0.5 rounded-lg flex items-center gap-1.5 ${
+                  isBright
+                    ? 'bg-slate-900 text-white'
+                    : isDark
+                    ? 'bg-emerald-500/20 text-emerald-100 border border-emerald-400/50'
+                    : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                }`}
+              >
+                <span className="font-mono">⏳</span>
+                <span>{remaining.text} remaining</span>
+              </span>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Ramadan / Fasting Status Quick Card on Dashboard */}
-      <div className="bg-gradient-to-r from-neutral-900 via-neutral-900 to-emerald-950/30 p-4 sm:p-5 rounded-3xl border border-neutral-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div
+        id="dashboard-fasting-tracker-card"
+        className={`p-4 sm:p-5 rounded-3xl border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all ${
+          isBright
+            ? 'bg-white border-2 border-black text-black shadow-md'
+            : isDark
+            ? 'bg-gradient-to-r from-neutral-900 via-neutral-900 to-emerald-950/40 border border-neutral-800 text-white'
+            : 'bg-emerald-50/80 border-2 border-emerald-200 text-slate-900'
+        }`}
+      >
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-emerald-950/70 text-emerald-400 border border-emerald-800/40 flex items-center justify-center font-bold shrink-0">
+          <div
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold shrink-0 border ${
+              isBright
+                ? 'bg-black text-white border-black'
+                : isDark
+                ? 'bg-emerald-950/70 text-emerald-400 border-emerald-800/40'
+                : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+            }`}
+          >
             <Moon className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-white">Ramadan & Fasting Tracker</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-900/40 text-emerald-300 border border-emerald-800/40 font-mono">
+              <span
+                className={`text-sm font-bold ${
+                  isBright ? 'text-black font-black' : isDark ? 'text-white' : 'text-slate-900'
+                }`}
+              >
+                Ramadan &amp; Fasting Tracker
+              </span>
+              <span
+                className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold font-mono border ${
+                  isBright
+                    ? 'bg-black text-white border-black'
+                    : isDark
+                    ? 'bg-emerald-900/60 text-emerald-300 border-emerald-800/60'
+                    : 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                }`}
+              >
                 {Object.keys(userProfile.fastingLogs || {}).filter((k) => userProfile.fastingLogs[k]?.completed).length} Fasts Completed
               </span>
             </div>
-            <p className="text-xs text-neutral-400 mt-0.5">
+            <p
+              className={`text-xs mt-0.5 ${
+                isBright ? 'text-black font-medium' : isDark ? 'text-neutral-300' : 'text-slate-700 font-medium'
+              }`}
+            >
               {userProfile.fastingLogs?.[todayKey]?.completed
                 ? '✓ You have marked your fast for today as completed.'
                 : 'Are you fasting today? Track your intention, Suhoor, Iftar Duas & annual record.'}
@@ -658,7 +840,13 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
 
         <button
           onClick={() => onNavigateTab('profile')}
-          className="px-4 py-2 rounded-2xl bg-neutral-800 hover:bg-emerald-600 text-neutral-200 hover:text-white text-xs font-semibold border border-neutral-700 transition-all cursor-pointer whitespace-nowrap"
+          className={`px-4 py-2 rounded-2xl text-xs font-bold border transition-all cursor-pointer whitespace-nowrap shadow-sm ${
+            isBright
+              ? 'bg-black text-white hover:bg-neutral-800 border-black'
+              : isDark
+              ? 'bg-neutral-800 hover:bg-emerald-600 text-neutral-200 hover:text-white border-neutral-700'
+              : 'bg-white hover:bg-emerald-700 text-emerald-900 hover:text-white border-emerald-300'
+          }`}
         >
           Open Fasting Tracker →
         </button>
@@ -756,34 +944,82 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
                 id={`prayer-row-${prayer.key}`}
                 className={`py-3.5 px-3 rounded-2xl flex items-center justify-between transition-all ${
                   prayer.isNext
-                    ? 'bg-emerald-950/25 border border-emerald-800/40 shadow-sm'
+                    ? isBright
+                      ? 'bg-emerald-50 border-2 border-black shadow-md ring-1 ring-black'
+                      : isDark
+                      ? 'bg-emerald-950/60 border-2 border-emerald-400 shadow-lg shadow-emerald-950/40'
+                      : 'bg-emerald-50 border-2 border-emerald-600 shadow-sm'
                     : prayer.isCurrent
-                    ? 'bg-amber-950/20 border border-amber-900/30'
-                    : 'hover:bg-neutral-800/40'
+                    ? isBright
+                      ? 'bg-amber-100/70 border-2 border-amber-600'
+                      : isDark
+                      ? 'bg-amber-950/40 border border-amber-600/50'
+                      : 'bg-amber-50 border border-amber-400'
+                    : isBright
+                    ? 'hover:bg-slate-100 border border-transparent'
+                    : isDark
+                    ? 'hover:bg-neutral-800/40 border border-transparent'
+                    : 'hover:bg-slate-50 border border-transparent'
                 }`}
               >
                 {/* Left: Icon + Name */}
                 <div className="flex items-center gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-neutral-800 border border-neutral-700/80 flex items-center justify-center shrink-0">
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
+                      prayer.isNext
+                        ? isBright
+                          ? 'bg-black text-white border-black'
+                          : isDark
+                          ? 'bg-emerald-500 text-neutral-950 border-emerald-400'
+                          : 'bg-emerald-700 text-white border-emerald-800'
+                        : 'bg-neutral-800/80 border-neutral-700/80'
+                    }`}
+                  >
                     {getPrayerIcon(prayer.key)}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white text-sm sm:text-base">
+                      <span
+                        className={`text-sm sm:text-base ${
+                          prayer.isNext
+                            ? isBright
+                              ? 'text-black font-black'
+                              : isDark
+                              ? 'text-emerald-300 font-extrabold'
+                              : 'text-emerald-950 font-extrabold'
+                            : isBright
+                            ? 'text-black font-bold'
+                            : isDark
+                            ? 'text-white font-semibold'
+                            : 'text-slate-900 font-semibold'
+                        }`}
+                      >
                         {prayer.name}
                       </span>
                       {prayer.isNext && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-600 text-white">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider ${
+                            isBright
+                              ? 'bg-black text-white'
+                              : isDark
+                              ? 'bg-emerald-400 text-neutral-950 font-black'
+                              : 'bg-emerald-700 text-white font-extrabold shadow-xs'
+                          }`}
+                        >
                           Next
                         </span>
                       )}
                       {prayer.isCurrent && !prayer.isNext && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-500 text-white">
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-amber-500 text-white">
                           Current
                         </span>
                       )}
                     </div>
-                    <span className="font-arabic text-sm text-neutral-500 font-normal">
+                    <span
+                      className={`font-arabic text-sm font-normal ${
+                        isBright ? 'text-neutral-700' : isDark ? 'text-neutral-400' : 'text-slate-600'
+                      }`}
+                    >
                       {prayer.arabicName}
                     </span>
                   </div>
@@ -791,7 +1027,21 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
 
                 {/* Right: Time + Alarm toggle + Performed Checkbox */}
                 <div className="flex items-center gap-3 sm:gap-5">
-                  <span className="font-mono font-bold text-base sm:text-lg text-white">
+                  <span
+                    className={`font-mono tracking-tight text-base sm:text-xl ${
+                      prayer.isNext
+                        ? isBright
+                          ? 'text-black font-black text-lg sm:text-2xl'
+                          : isDark
+                          ? 'text-emerald-300 font-black text-lg sm:text-2xl drop-shadow-sm'
+                          : 'text-emerald-950 font-black text-lg sm:text-2xl'
+                        : isBright
+                        ? 'text-black font-extrabold'
+                        : isDark
+                        ? 'text-white font-extrabold'
+                        : 'text-slate-900 font-extrabold'
+                    }`}
+                  >
                     {prayer.timeFormatted}
                   </span>
 

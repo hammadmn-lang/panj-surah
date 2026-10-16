@@ -297,14 +297,14 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
           {/* TAB 2: COPYRIGHT & INTELLECTUAL PROPERTY */}
           {activeTab === 'copyright' && (
             <div className="space-y-5 animate-in fade-in duration-150">
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-950/60 to-neutral-950 border border-emerald-800/80 text-center space-y-2">
-                <div className="inline-block px-3 py-1 rounded-full bg-emerald-900/60 text-emerald-300 text-xs font-mono font-semibold border border-emerald-700/50">
+              <div className="p-5 rounded-2xl bg-emerald-50/80 dark:bg-gradient-to-br dark:from-emerald-950/60 dark:to-neutral-950 border border-emerald-200 dark:border-emerald-800/80 text-center space-y-2">
+                <div className="inline-block px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-900 dark:text-emerald-300 text-xs font-mono font-bold border border-emerald-300 dark:border-emerald-700/50">
                   OFFICIAL COPYRIGHT NOTICE
                 </div>
-                <h3 className="text-lg font-bold text-white">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                   Copyright © 2026 Panj Surah. All Rights Reserved.
                 </h3>
-                <p className="text-xs text-neutral-400 max-w-lg mx-auto">
+                <p className="text-xs text-slate-600 dark:text-neutral-400 max-w-lg mx-auto font-medium">
                   Registered intellectual property covering application source code, UI/UX design, visual identity, and software architecture.
                 </p>
               </div>

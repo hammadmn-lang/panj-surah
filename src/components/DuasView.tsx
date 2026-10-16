@@ -59,9 +59,20 @@ export const DuasView: React.FC<DuasViewProps> = ({
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [showOnlyFavorites, setShowOnlyFavorites] = useState<boolean>(false);
   const [isManzilReaderOpen, setIsManzilReaderOpen] = useState<boolean>(false);
+  const [specialFilter, setSpecialFilter] = useState<'none' | 'ayatul-kursi' | 'qunoot'>('none');
+
+  const isDark = userProfile.theme === 'dark' || userProfile.theme === 'emerald-dark';
+  const isBright = userProfile.theme === 'bright';
 
   // Filter duas
   const filteredDuas = DUAS_COLLECTION.filter((d) => {
+    if (specialFilter === 'ayatul-kursi') {
+      return d.id === 'dua-ayatul-kursi';
+    }
+    if (specialFilter === 'qunoot') {
+      return d.id.includes('qunoot');
+    }
+
     const isFav = userProfile.favoriteDuaIds.includes(d.id);
     if (showOnlyFavorites && !isFav) return false;
 
@@ -126,16 +137,40 @@ export const DuasView: React.FC<DuasViewProps> = ({
   return (
     <div className="space-y-6 pb-20 sm:pb-12 max-w-4xl mx-auto px-2 sm:px-0 animate-fade-in">
       {/* Hero Header */}
-      <div className="bg-gradient-to-r from-neutral-900 via-neutral-900 to-neutral-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-neutral-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+      <div
+        className={`rounded-3xl p-6 sm:p-8 shadow-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 transition-all ${
+          isBright
+            ? 'bg-white border-2 border-black text-black shadow-md ring-1 ring-black'
+            : isDark
+            ? 'bg-gradient-to-r from-neutral-900 via-neutral-900 to-neutral-950 text-white border-neutral-800'
+            : 'bg-emerald-50/80 border-2 border-emerald-200 text-slate-900'
+        }`}
+      >
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/60 text-emerald-300 border border-emerald-800/40">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            Authentic Masnoon Supplications
+          <div
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+              isBright
+                ? 'bg-black text-white border-black'
+                : isDark
+                ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800/40'
+                : 'bg-emerald-100 text-emerald-900 border-emerald-300'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>Authentic Masnoon Supplications</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-medium font-serif tracking-tight text-white">
+          <h2
+            className={`text-2xl sm:text-3xl font-bold font-serif tracking-tight ${
+              isBright ? 'text-black' : isDark ? 'text-white' : 'text-slate-900'
+            }`}
+          >
             Recommended Duas for Every Situation
           </h2>
-          <p className="text-xs sm:text-sm text-neutral-400 max-w-xl leading-relaxed">
+          <p
+            className={`text-xs sm:text-sm max-w-xl leading-relaxed ${
+              isBright ? 'text-black font-medium' : isDark ? 'text-neutral-400' : 'text-slate-700 font-medium'
+            }`}
+          >
             "And when My servants ask you concerning Me, indeed I am near. I respond to the invocation of the supplicant when he calls upon Me." (Surah Al-Baqarah 2:186)
           </p>
         </div>
@@ -146,17 +181,29 @@ export const DuasView: React.FC<DuasViewProps> = ({
           className={`p-4 rounded-2xl border transition-all text-center min-w-[150px] shrink-0 cursor-pointer ${
             showOnlyFavorites
               ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg'
-              : 'bg-neutral-950/80 text-white border-neutral-800 hover:bg-neutral-800'
+              : isBright
+              ? 'bg-slate-50 text-black border-2 border-slate-900 hover:bg-slate-100'
+              : isDark
+              ? 'bg-neutral-950/80 text-white border-neutral-800 hover:bg-neutral-800'
+              : 'bg-white text-slate-900 border-slate-200 hover:bg-slate-50'
           }`}
         >
-          <div className="flex items-center justify-center gap-1.5 text-xs font-medium">
-            <Bookmark className={`w-4 h-4 ${showOnlyFavorites ? 'fill-white' : 'text-emerald-400'}`} />
+          <div className="flex items-center justify-center gap-1.5 text-xs font-bold">
+            <Bookmark className={`w-4 h-4 ${showOnlyFavorites ? 'fill-white' : 'text-emerald-500'}`} />
             <span>Saved Bookmarks</span>
           </div>
-          <div className="text-2xl font-bold font-mono mt-1 text-emerald-300">
+          <div
+            className={`text-2xl font-bold font-mono mt-1 ${
+              isBright ? 'text-black' : isDark ? 'text-emerald-300' : 'text-emerald-700'
+            }`}
+          >
             {userProfile.favoriteDuaIds.length}
           </div>
-          <span className="text-[10px] text-neutral-400">
+          <span
+            className={`text-[10px] ${
+              isBright ? 'text-slate-700 font-bold' : isDark ? 'text-neutral-400' : 'text-slate-500'
+            }`}
+          >
             {showOnlyFavorites ? 'Showing Bookmarks' : 'Filter Bookmarked'}
           </span>
         </button>
@@ -165,32 +212,82 @@ export const DuasView: React.FC<DuasViewProps> = ({
       {/* Featured Manzil (Munzil) Ruqyah Card */}
       <div
         id="manzil-featured-banner"
-        className="bg-gradient-to-r from-emerald-950 via-neutral-900 to-neutral-950 p-5 sm:p-6 rounded-3xl border border-emerald-800/60 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative overflow-hidden"
+        className={`p-5 sm:p-6 rounded-3xl border shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative overflow-hidden transition-all ${
+          isBright
+            ? 'bg-white border-2 border-black text-black shadow-md'
+            : isDark
+            ? 'bg-gradient-to-r from-emerald-950 via-neutral-900 to-neutral-950 text-white border-emerald-800/60'
+            : 'bg-emerald-50/90 border-2 border-emerald-300 text-slate-900'
+        }`}
       >
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-900/70 border border-emerald-600/50 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
-            <Shield className="w-6 h-6 text-emerald-300" />
+          <div
+            className={`w-12 h-12 rounded-2xl border flex items-center justify-center shrink-0 shadow-inner ${
+              isBright
+                ? 'bg-black text-white border-black'
+                : isDark
+                ? 'bg-emerald-900/70 border-emerald-600/50 text-emerald-300'
+                : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+            }`}
+          >
+            <Shield className="w-6 h-6" />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 font-mono">
-                Divine Protection & Ruqyah
+              <span
+                className={`text-[11px] font-bold uppercase tracking-wider font-mono ${
+                  isBright ? 'text-black' : isDark ? 'text-emerald-400' : 'text-emerald-800'
+                }`}
+              >
+                Divine Protection &amp; Ruqyah
               </span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-900/60 text-emerald-200 border border-emerald-700/60 font-arabic font-semibold">
+              <span
+                className={`text-xs px-2.5 py-0.5 rounded-full font-arabic font-bold border ${
+                  isBright
+                    ? 'bg-black text-white border-black'
+                    : isDark
+                    ? 'bg-emerald-900/60 text-emerald-200 border-emerald-700/60'
+                    : 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                }`}
+              >
                 منزل مبارک
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 font-mono">
+              <span
+                className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                  isBright
+                    ? 'bg-slate-200 text-black border border-slate-400'
+                    : isDark
+                    ? 'bg-neutral-800 text-neutral-300'
+                    : 'bg-slate-100 text-slate-700 border border-slate-200'
+                }`}
+              >
                 33 Verses • 18 Sections
               </span>
-              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono font-bold flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span
+                className={`text-[10px] px-2.5 py-0.5 rounded-full font-mono font-bold flex items-center gap-1 border ${
+                  isBright
+                    ? 'bg-emerald-100 text-emerald-950 border-emerald-400'
+                    : isDark
+                    ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                    : 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                }`}
+              >
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                 {userProfile.manzilTotalCompletions || 0} In Profile Stats
               </span>
             </div>
-            <h3 className="text-lg sm:text-xl font-bold font-serif text-white mt-1">
+            <h3
+              className={`text-lg sm:text-xl font-bold font-serif mt-1 ${
+                isBright ? 'text-black' : isDark ? 'text-white' : 'text-slate-900'
+              }`}
+            >
               Manzil (منزل) — 33 Protective Quranic Verses
             </h3>
-            <p className="text-xs sm:text-sm text-neutral-300 mt-1 max-w-xl leading-relaxed">
+            <p
+              className={`text-xs sm:text-sm mt-1 max-w-xl leading-relaxed ${
+                isBright ? 'text-black font-medium' : isDark ? 'text-neutral-300' : 'text-slate-700 font-medium'
+              }`}
+            >
               Prophetic verses and Quranic supplications recited for safeguard against the evil eye (Nazar), black magic (Sihr), illness, and anxiety.
             </p>
           </div>
@@ -237,6 +334,153 @@ export const DuasView: React.FC<DuasViewProps> = ({
         </div>
       </div>
 
+      {/* Special Highlights: Ayat-ul-Kursi & Dua-e-Qunoot */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* Ayat-ul-Kursi Card */}
+        <button
+          id="btn-quick-ayatul-kursi"
+          onClick={() => {
+            setSpecialFilter('ayatul-kursi');
+            setShowOnlyFavorites(false);
+            setSearchTerm('');
+          }}
+          className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between gap-3 ${
+            specialFilter === 'ayatul-kursi'
+              ? isBright
+                ? 'bg-white border-2 border-black ring-2 ring-black text-black'
+                : isDark
+                ? 'bg-emerald-950/90 border-emerald-500 shadow-lg ring-2 ring-emerald-500 text-white'
+                : 'bg-emerald-100/90 border-2 border-emerald-600 shadow-md text-emerald-950'
+              : isBright
+              ? 'bg-white border-2 border-slate-300 hover:border-black text-black'
+              : isDark
+              ? 'bg-neutral-900 border-neutral-800 hover:border-emerald-700/60 hover:bg-neutral-850 text-white'
+              : 'bg-white border border-slate-200 hover:border-emerald-400 text-slate-900 shadow-xs'
+          }`}
+        >
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-[11px] font-bold uppercase tracking-wider font-mono ${
+                  isBright ? 'text-black' : isDark ? 'text-amber-400' : 'text-amber-800'
+                }`}
+              >
+                Crown of the Quran
+              </span>
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full font-arabic font-semibold border ${
+                  isBright
+                    ? 'bg-black text-white border-black'
+                    : isDark
+                    ? 'bg-amber-950/60 text-amber-300 border-amber-800/40'
+                    : 'bg-amber-100 text-amber-900 border-amber-300'
+                }`}
+              >
+                آية الكرسي
+              </span>
+            </div>
+            <h4
+              className={`text-sm sm:text-base font-bold ${
+                isBright ? 'text-black' : isDark ? 'text-white' : 'text-slate-900'
+              }`}
+            >
+              Ayat al-Kursi (آية الكرسي)
+            </h4>
+            <p
+              className={`text-xs ${
+                isBright ? 'text-black font-medium' : isDark ? 'text-neutral-400' : 'text-slate-600 font-medium'
+              }`}
+            >
+              The Throne Verse (Surah Al-Baqarah 2:255). Recited after every Salah &amp; before sleeping.
+            </p>
+          </div>
+          <span className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shrink-0 shadow-sm">
+            View
+          </span>
+        </button>
+
+        {/* Dua-e-Qunoot Card */}
+        <button
+          id="btn-quick-dua-qunoot"
+          onClick={() => {
+            setSpecialFilter('qunoot');
+            setShowOnlyFavorites(false);
+            setSearchTerm('');
+          }}
+          className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between gap-3 ${
+            specialFilter === 'qunoot'
+              ? isBright
+                ? 'bg-white border-2 border-black ring-2 ring-black text-black'
+                : isDark
+                ? 'bg-emerald-950/90 border-emerald-500 shadow-lg ring-2 ring-emerald-500 text-white'
+                : 'bg-emerald-100/90 border-2 border-emerald-600 shadow-md text-emerald-950'
+              : isBright
+              ? 'bg-white border-2 border-slate-300 hover:border-black text-black'
+              : isDark
+              ? 'bg-neutral-900 border-neutral-800 hover:border-emerald-700/60 hover:bg-neutral-850 text-white'
+              : 'bg-white border border-slate-200 hover:border-emerald-400 text-slate-900 shadow-xs'
+          }`}
+        >
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-[11px] font-bold uppercase tracking-wider font-mono ${
+                  isBright ? 'text-black' : isDark ? 'text-emerald-400' : 'text-emerald-800'
+                }`}
+              >
+                Salatul Witr
+              </span>
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full font-arabic font-semibold border ${
+                  isBright
+                    ? 'bg-black text-white border-black'
+                    : isDark
+                    ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800/40'
+                    : 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                }`}
+              >
+                دعاء القنوت
+              </span>
+            </div>
+            <h4
+              className={`text-sm sm:text-base font-bold ${
+                isBright ? 'text-black' : isDark ? 'text-white' : 'text-slate-900'
+              }`}
+            >
+              Dua-e-Qunoot (دعاء القنوت)
+            </h4>
+            <p
+              className={`text-xs ${
+                isBright ? 'text-black font-medium' : isDark ? 'text-neutral-400' : 'text-slate-600 font-medium'
+              }`}
+            >
+              Complete Hanafi &amp; Prophetic Witr supplications with Arabic, Urdu &amp; English.
+            </p>
+          </div>
+          <span className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shrink-0 shadow-sm">
+            View
+          </span>
+        </button>
+      </div>
+
+      {/* Active Special Filter Banner */}
+      {specialFilter !== 'none' && (
+        <div className="p-3.5 rounded-2xl bg-emerald-950/80 border border-emerald-700/70 text-emerald-200 text-xs flex items-center justify-between gap-2 shadow-md">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>
+              Showing: <strong>{specialFilter === 'ayatul-kursi' ? 'Ayat al-Kursi (The Throne Verse - آية الكرسي)' : 'Dua-e-Qunoot (Hanafi & Prophetic Witr - دعاء القنوت)'}</strong>
+            </span>
+          </div>
+          <button
+            onClick={() => setSpecialFilter('none')}
+            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold cursor-pointer shrink-0 shadow-sm"
+          >
+            Show All Duas
+          </button>
+        </div>
+      )}
+
       {/* Featured Quick Category Shortcuts */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
         <button
@@ -244,10 +488,11 @@ export const DuasView: React.FC<DuasViewProps> = ({
           onClick={() => {
             setSelectedCategory('Manzil (منزل - Protection & Ruqyah)');
             setShowOnlyFavorites(false);
+            setSpecialFilter('none');
             setSearchTerm('');
           }}
           className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-            selectedCategory === 'Manzil (منزل - Protection & Ruqyah)' && !showOnlyFavorites
+            selectedCategory === 'Manzil (منزل - Protection & Ruqyah)' && !showOnlyFavorites && specialFilter === 'none'
               ? 'bg-emerald-950/90 border-emerald-500 shadow-md ring-1 ring-emerald-500'
               : 'bg-neutral-900 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-850'
           }`}
@@ -265,10 +510,11 @@ export const DuasView: React.FC<DuasViewProps> = ({
           onClick={() => {
             setSelectedCategory('Six Kalimas (کلمات)');
             setShowOnlyFavorites(false);
+            setSpecialFilter('none');
             setSearchTerm('');
           }}
           className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-            selectedCategory === 'Six Kalimas (کلمات)' && !showOnlyFavorites
+            selectedCategory === 'Six Kalimas (کلمات)' && !showOnlyFavorites && specialFilter === 'none'
               ? 'bg-emerald-950/90 border-emerald-500 shadow-md ring-1 ring-emerald-500'
               : 'bg-neutral-900 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-850'
           }`}
@@ -286,10 +532,11 @@ export const DuasView: React.FC<DuasViewProps> = ({
           onClick={() => {
             setSelectedCategory('Iman Mufassal & Mujmal (ایمان)');
             setShowOnlyFavorites(false);
+            setSpecialFilter('none');
             setSearchTerm('');
           }}
           className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-            selectedCategory === 'Iman Mufassal & Mujmal (ایمان)' && !showOnlyFavorites
+            selectedCategory === 'Iman Mufassal & Mujmal (ایمان)' && !showOnlyFavorites && specialFilter === 'none'
               ? 'bg-emerald-950/90 border-emerald-500 shadow-md ring-1 ring-emerald-500'
               : 'bg-neutral-900 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-850'
           }`}
@@ -307,10 +554,11 @@ export const DuasView: React.FC<DuasViewProps> = ({
           onClick={() => {
             setSelectedCategory('Eating & Drinking (کھانا پینا)');
             setShowOnlyFavorites(false);
+            setSpecialFilter('none');
             setSearchTerm('');
           }}
           className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-            selectedCategory === 'Eating & Drinking (کھانا پینا)' && !showOnlyFavorites
+            selectedCategory === 'Eating & Drinking (کھانا پینا)' && !showOnlyFavorites && specialFilter === 'none'
               ? 'bg-emerald-950/90 border-emerald-500 shadow-md ring-1 ring-emerald-500'
               : 'bg-neutral-900 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-850'
           }`}
@@ -328,10 +576,11 @@ export const DuasView: React.FC<DuasViewProps> = ({
           onClick={() => {
             setSelectedCategory('Daily Life Prayers (روزمرہ مسنون دعائیں)');
             setShowOnlyFavorites(false);
+            setSpecialFilter('none');
             setSearchTerm('');
           }}
           className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-            selectedCategory === 'Daily Life Prayers (روزمرہ مسنون دعائیں)' && !showOnlyFavorites
+            selectedCategory === 'Daily Life Prayers (روزمرہ مسنون دعائیں)' && !showOnlyFavorites && specialFilter === 'none'
               ? 'bg-emerald-950/90 border-emerald-500 shadow-md ring-1 ring-emerald-500'
               : 'bg-neutral-900 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-850'
           }`}
@@ -353,9 +602,12 @@ export const DuasView: React.FC<DuasViewProps> = ({
           <input
             id="search-duas-input"
             type="text"
-            placeholder="Search by topic (e.g. kalima, iman, eating, sleep, wudu, washroom, shifa, parents)..."
+            placeholder="Search by topic (e.g. kalima, qunoot, kursi, iman, eating, sleep, wudu, washroom, shifa)..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              if (specialFilter !== 'none') setSpecialFilter('none');
+            }}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
@@ -363,13 +615,14 @@ export const DuasView: React.FC<DuasViewProps> = ({
         {/* Categories Chips */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
           {CATEGORIES.map((cat) => {
-            const isSelected = selectedCategory === cat && !showOnlyFavorites;
+            const isSelected = selectedCategory === cat && !showOnlyFavorites && specialFilter === 'none';
             return (
               <button
                 key={cat}
                 onClick={() => {
                   setSelectedCategory(cat);
                   setShowOnlyFavorites(false);
+                  setSpecialFilter('none');
                 }}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
                   isSelected
