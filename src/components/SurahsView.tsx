@@ -85,19 +85,23 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
     checkCaches();
   }, []);
 
-  // Filter surahs
+  const isDark = userProfile.theme === 'dark' || userProfile.theme === 'emerald-dark';
+  const isBright = userProfile.theme === 'bright';
+
+  // Filter and align surahs by their exact Quran Pak Surah number
   const filteredSurahs = SURAHS_DATA.filter((s) => {
     const matchesSearch =
       s.nameEnglish.toLowerCase().includes(searchTerm.toLowerCase()) ||
       s.nameTransliteration.toLowerCase().includes(searchTerm.toLowerCase()) ||
       s.nameArabic.includes(searchTerm) ||
+      s.number.toString().includes(searchTerm.trim()) ||
       s.meaning.toLowerCase().includes(searchTerm.toLowerCase());
 
     if (!matchesSearch) return false;
     if (activeFilter === 'panj') return s.isPanjSurah;
     if (activeFilter === 'beginner') return s.isBeginnerRecommended;
     return true;
-  });
+  }).sort((a, b) => a.number - b.number);
 
   // Handle open Surah reader
   const handleOpenSurah = async (surah: Surah) => {
@@ -216,8 +220,16 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
               Back to Surahs
             </button>
 
-            {/* Title */}
+            {/* Title with Quran Pak Surah number */}
             <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-950/70 border border-emerald-800/40 text-emerald-300 font-bold">
+                  Surah #{selectedSurah.number} in Quran Pak
+                </span>
+                <span className="text-xs font-arabic text-emerald-400 font-bold">
+                  قرآن پاک میں سورۃ نمبر {selectedSurah.number}
+                </span>
+              </div>
               <h2 className="font-serif font-medium text-lg sm:text-xl text-white">
                 Surah {selectedSurah.nameTransliteration} ({selectedSurah.nameArabic})
               </h2>
@@ -753,7 +765,7 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
                     : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
                 }`}
               >
-                All 15 Key Surahs
+                All Surahs (Quran Pak Order #1 → #114)
               </button>
             </div>
           </div>
@@ -776,13 +788,22 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
                     {/* Top Row: Number + Badges + Arabic Name */}
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-10 h-10 rounded-2xl bg-neutral-800 border border-neutral-700 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
-                          {surah.number}
+                        <div
+                          className="w-11 h-11 rounded-2xl bg-neutral-800 border border-neutral-700 text-emerald-400 flex flex-col items-center justify-center shrink-0"
+                          title={`Surah #${surah.number} in Quran Pak`}
+                        >
+                          <span className="text-[9px] uppercase font-mono tracking-tighter opacity-70">Surah</span>
+                          <span className="font-bold font-mono text-sm leading-none">{surah.number}</span>
                         </div>
                         <div>
-                          <h3 className="font-semibold text-white text-base group-hover:text-emerald-400 transition-colors">
-                            {surah.nameTransliteration}
-                          </h3>
+                          <div className="flex items-center gap-1.5">
+                            <h3 className="font-semibold text-white text-base group-hover:text-emerald-400 transition-colors">
+                              {surah.nameTransliteration}
+                            </h3>
+                            <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-950/70 text-emerald-300 border border-emerald-800/40">
+                              #{surah.number}
+                            </span>
+                          </div>
                           <p className="text-xs text-neutral-400">
                             {surah.nameEnglish} • {surah.versesCount} Verses
                           </p>

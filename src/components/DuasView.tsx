@@ -59,7 +59,7 @@ export const DuasView: React.FC<DuasViewProps> = ({
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [showOnlyFavorites, setShowOnlyFavorites] = useState<boolean>(false);
   const [isManzilReaderOpen, setIsManzilReaderOpen] = useState<boolean>(false);
-  const [specialFilter, setSpecialFilter] = useState<'none' | 'ayatul-kursi' | 'qunoot'>('none');
+  const [specialFilter, setSpecialFilter] = useState<'none' | 'ayatul-kursi' | 'qunoot' | 'sleep'>('none');
 
   const isDark = userProfile.theme === 'dark' || userProfile.theme === 'emerald-dark';
   const isBright = userProfile.theme === 'bright';
@@ -71,6 +71,15 @@ export const DuasView: React.FC<DuasViewProps> = ({
     }
     if (specialFilter === 'qunoot') {
       return d.id.includes('qunoot');
+    }
+    if (specialFilter === 'sleep') {
+      return (
+        d.category === 'Before Sleep & Waking' ||
+        d.id.includes('sleep') ||
+        d.id.includes('waking') ||
+        d.id === 'dua-before-sleeping' ||
+        d.id === 'dua-bedtime-lying-down'
+      );
     }
 
     const isFav = userProfile.favoriteDuaIds.includes(d.id);
@@ -334,8 +343,8 @@ export const DuasView: React.FC<DuasViewProps> = ({
         </div>
       </div>
 
-      {/* Special Highlights: Ayat-ul-Kursi & Dua-e-Qunoot */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {/* Special Highlights: Ayat-ul-Kursi, Dua-e-Qunoot & Night Sleeping Duas */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Ayat-ul-Kursi Card */}
         <button
           id="btn-quick-ayatul-kursi"
@@ -365,7 +374,7 @@ export const DuasView: React.FC<DuasViewProps> = ({
                   isBright ? 'text-black' : isDark ? 'text-amber-400' : 'text-amber-800'
                 }`}
               >
-                Crown of the Quran
+                Crown of Quran
               </span>
               <span
                 className={`text-xs px-2 py-0.5 rounded-full font-arabic font-semibold border ${
@@ -391,7 +400,7 @@ export const DuasView: React.FC<DuasViewProps> = ({
                 isBright ? 'text-black font-medium' : isDark ? 'text-neutral-400' : 'text-slate-600 font-medium'
               }`}
             >
-              The Throne Verse (Surah Al-Baqarah 2:255). Recited after every Salah &amp; before sleeping.
+              Surah Al-Baqarah 2:255. Supreme protection day and night.
             </p>
           </div>
           <span className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shrink-0 shadow-sm">
@@ -454,7 +463,70 @@ export const DuasView: React.FC<DuasViewProps> = ({
                 isBright ? 'text-black font-medium' : isDark ? 'text-neutral-400' : 'text-slate-600 font-medium'
               }`}
             >
-              Complete Hanafi &amp; Prophetic Witr supplications with Arabic, Urdu &amp; English.
+              Hanafi &amp; Prophetic Witr supplications with translation.
+            </p>
+          </div>
+          <span className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shrink-0 shadow-sm">
+            View
+          </span>
+        </button>
+
+        {/* Night Sleeping Duas Spotlight Card */}
+        <button
+          id="btn-quick-sleeping-dua"
+          onClick={() => {
+            setSpecialFilter('sleep');
+            setShowOnlyFavorites(false);
+            setSearchTerm('');
+          }}
+          className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between gap-3 ${
+            specialFilter === 'sleep'
+              ? isBright
+                ? 'bg-white border-2 border-black ring-2 ring-black text-black'
+                : isDark
+                ? 'bg-emerald-950/90 border-emerald-500 shadow-lg ring-2 ring-emerald-500 text-white'
+                : 'bg-emerald-100/90 border-2 border-emerald-600 shadow-md text-emerald-950'
+              : isBright
+              ? 'bg-white border-2 border-slate-300 hover:border-black text-black'
+              : isDark
+              ? 'bg-neutral-900 border-neutral-800 hover:border-emerald-700/60 hover:bg-neutral-850 text-white'
+              : 'bg-white border border-slate-200 hover:border-emerald-400 text-slate-900 shadow-xs'
+          }`}
+        >
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-[11px] font-bold uppercase tracking-wider font-mono ${
+                  isBright ? 'text-black' : isDark ? 'text-cyan-400' : 'text-cyan-800'
+                }`}
+              >
+                Bedtime Sunnah
+              </span>
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full font-arabic font-semibold border ${
+                  isBright
+                    ? 'bg-black text-white border-black'
+                    : isDark
+                    ? 'bg-cyan-950/60 text-cyan-300 border-cyan-800/40'
+                    : 'bg-cyan-100 text-cyan-900 border-cyan-300'
+                }`}
+              >
+                دعاء النوم
+              </span>
+            </div>
+            <h4
+              className={`text-sm sm:text-base font-bold ${
+                isBright ? 'text-black' : isDark ? 'text-white' : 'text-slate-900'
+              }`}
+            >
+              Night Sleeping Duas (سوتے وقت کی دعائیں)
+            </h4>
+            <p
+              className={`text-xs ${
+                isBright ? 'text-black font-medium' : isDark ? 'text-neutral-400' : 'text-slate-600 font-medium'
+              }`}
+            >
+              Authentic Sunnah Duas for sleeping, protection from nightmares &amp; waking.
             </p>
           </div>
           <span className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shrink-0 shadow-sm">
@@ -469,7 +541,14 @@ export const DuasView: React.FC<DuasViewProps> = ({
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>
-              Showing: <strong>{specialFilter === 'ayatul-kursi' ? 'Ayat al-Kursi (The Throne Verse - آية الكرسي)' : 'Dua-e-Qunoot (Hanafi & Prophetic Witr - دعاء القنوت)'}</strong>
+              Showing:{' '}
+              <strong>
+                {specialFilter === 'ayatul-kursi'
+                  ? 'Ayat al-Kursi (The Throne Verse - آية الكرسي)'
+                  : specialFilter === 'qunoot'
+                  ? 'Dua-e-Qunoot (Hanafi & Prophetic Witr - دعاء القنوت)'
+                  : 'Night Sleeping & Bedtime Duas (سوتے وقت کی مسنون دعائیں)'}
+              </strong>
             </span>
           </div>
           <button

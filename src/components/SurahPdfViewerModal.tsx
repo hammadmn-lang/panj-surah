@@ -35,10 +35,10 @@ export const SurahPdfViewerModal: React.FC<SurahPdfViewerModalProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-base sm:text-lg text-emerald-950 flex items-center gap-2">
-                Surah {surah.nameTransliteration} ({surah.nameArabic}) — Mushaf PDF
+                Surah #{surah.number} {surah.nameTransliteration} ({surah.nameArabic}) — Mushaf PDF
               </h3>
               <p className="text-xs text-slate-600">
-                {surah.versesCount} Ayahs • {totalPdfPages} Mushaf Pages (11 Ayat/Page format)
+                Surah #{surah.number} in Holy Quran • {surah.versesCount} Ayahs • {totalPdfPages} Mushaf Pages
               </p>
             </div>
           </div>
