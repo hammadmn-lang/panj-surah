@@ -221,6 +221,7 @@
       <div class="nav-shortcuts">
         <a href="#overview" class="nav-pill">Privacy Overview</a>
         <a href="#permissions" class="nav-pill">Device Permissions</a>
+        <a href="#google-play-compliance" class="nav-pill">Play Policy Compliance</a>
         <a href="#storage" class="nav-pill">Data &amp; Storage</a>
         <a href="#advertising" class="nav-pill">Advertising &amp; AdMob</a>
         <a href="#children" class="nav-pill">Children's Privacy</a>
@@ -387,6 +388,58 @@
       <p>
         These servers may log standard technical HTTP connection metadata (such as IP address and user agent) solely for the technical transmission of audio files and font assets.
       </p>
+    </section>
+
+    <!-- SECTION: GOOGLE PLAY POLICIES & RESTRICTED PERMISSIONS DECLARATION -->
+    <section id="google-play-compliance" class="card" style="border-left: 4px solid var(--emerald);">
+      <h2><span class="icon">🛡️</span> Google Play Policy Compliance &amp; Restricted Permissions Declarations</h2>
+      <p>
+        Panj Surah strictly complies with all Google Play Developer Program Policies, Sensitive Information guidelines, and the latest Google Play Policy updates:
+      </p>
+
+      <h3>1. Location Data Scope (Minimum Scope Principle &amp; Android 17 / API 37+ Readiness)</h3>
+      <p>
+        In accordance with Google Play's <strong>Location Permission Policy</strong> and the upcoming Android 17 (API 37+) requirements:
+      </p>
+      <ul>
+        <li><strong>Minimum Scope Applied:</strong> Panj Surah utilizes coarse/approximate location scope solely for calculating astronomical sun angles (Fajr, Dhuhr, Asr, Maghrib, Isha) and the Kaaba heading (Qibla). High-accuracy hardware GPS is never required.</li>
+        <li><strong>On-Device Only:</strong> Coordinates are calculated strictly in device memory using local mathematical formulas and are never logged, stored in remote databases, or transmitted to external servers.</li>
+        <li><strong>Zero Background Tracking:</strong> Panj Surah does <em>not</em> request or utilize <code>ACCESS_BACKGROUND_LOCATION</code>. Location is queried strictly when initiated by the user.</li>
+        <li><strong>Unrestricted Manual Fallback:</strong> Users who decline location permissions enjoy 100% of the application's features by simply choosing their city manually from our offline database.</li>
+      </ul>
+
+      <h3>2. Restricted Permissions Audit &amp; Confirmation</h3>
+      <p>
+        To ensure total user privacy and zero policy violations, Panj Surah certifies that:
+      </p>
+      <ul>
+        <li><strong>Local Network Permission:</strong> <em>Not Requested / Not Used.</em> The app does not scan or connect to local network devices.</li>
+        <li><strong>Manage Contacts Permission:</strong> <em>Not Requested / Not Used.</em> The app does not access user contacts, address books, or telephony pickers.</li>
+        <li><strong>AppFunctions API:</strong> Panj Surah complies with all Google Play guidelines; it never deceives or manipulates AI agents, bypasses security controls, or interferes with other applications.</li>
+        <li><strong>All Files Access (<code>MANAGE_EXTERNAL_STORAGE</code>):</strong> <em>Not Requested / Not Used.</em> Devotional records and bookmarks are stored exclusively within sandboxed browser/app local storage (LocalStorage / IndexedDB).</li>
+        <li><strong>Accessibility API (<code>isAccessibilityTool</code>):</strong> <em>Not Requested / Not Used.</em> Panj Surah does not bind to Android Accessibility Services.</li>
+        <li><strong>SMS &amp; Call Log Permissions (<code>READ_CALL_LOG</code>):</strong> <em>Not Requested / Not Used.</em> The app does not make phone calls, verify accounts via telephony, or read SMS/call records.</li>
+        <li><strong>Cryptocurrency &amp; Trading:</strong> Panj Surah does not offer cryptocurrency, tokens, or financial exchange trading services.</li>
+      </ul>
+
+      <h3>3. Subscriptions, Payments &amp; In-App Purchases</h3>
+      <p>
+        Panj Surah is <strong>100% Free</strong>. There are:
+      </p>
+      <ul>
+        <li>No subscription plans or recurring billing.</li>
+        <li>No student or eligibility-based discounted subscriptions requiring ongoing verification.</li>
+        <li>No digital paywalls, paid currency, or in-app purchases.</li>
+      </ul>
+
+      <h3>4. Families Safety, Play Age Signals &amp; Ads-Free Commitment</h3>
+      <p>
+        Panj Surah is designed for the worldwide Muslim family and is appropriate for all ages:
+      </p>
+      <ul>
+        <li><strong>Zero Advertising SDKs:</strong> Contains no banner ads, video ads, or behavioral ad tracking SDKs.</li>
+        <li><strong>Play Age Signals:</strong> Adheres to family-friendly content rating guidelines with dignified, sacred Islamic literature and education.</li>
+      </ul>
     </section>
 
     <!-- SECTION: COPYRIGHT NOTICE -->

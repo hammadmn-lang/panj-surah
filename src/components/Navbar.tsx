@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { HijriDate } from '../utils/hijriCalendar';
 import { ActiveTab, UserLocation, UserProfile } from '../types';
+import appLogo from '../assets/images/app_logo_1791491470615.jpg';
 
 interface NavbarProps {
   activeTab: ActiveTab;
@@ -78,10 +79,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Brand Logo & Name */}
           <div className="flex items-center gap-3">
             <img
-              src="/src/assets/images/app_logo_1791491470615.jpg"
-              alt="Panj Surah App Logo"
-              referrerPolicy="no-referrer"
-              className="w-10 h-10 rounded-xl shadow-md border border-emerald-600/40 object-cover shrink-0"
+              src={appLogo}
+              alt="Panj Surah"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/app-logo.jpg';
+              }}
+              className="w-10 h-10 rounded-xl shadow-md border border-emerald-600/40 object-cover shrink-0 bg-emerald-950"
             />
             <div>
               <div className="flex items-center gap-2">

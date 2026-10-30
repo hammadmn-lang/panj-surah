@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Navigation, Search, Check, X, Globe, Settings, Sliders, Moon } from 'lucide-react';
+import { MapPin, Navigation, Search, Check, X, Globe, Settings, Sliders, Moon, ShieldCheck } from 'lucide-react';
 import { CalculationMethodKey, CalculationSettings, JuristicMethod, UserLocation } from '../types';
 import { CALCULATION_METHODS } from '../utils/prayerCalculator';
 import { getRegionalDefaultHijriOffset, getRegionalSightingInfo } from '../utils/hijriCalendar';
@@ -92,7 +92,7 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
         const sighting = getRegionalSightingInfo(derivedCountry, '', timeZone);
 
         // Find closest known city within ~60km (e.g., Lahore or Karachi)
-        let resolvedCity = 'Device GPS Location';
+        let resolvedCity = 'Device Location';
         let resolvedCountry = derivedCountry;
         let resolvedOffset = sighting.offset;
 
@@ -121,9 +121,9 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
       },
       (err) => {
         setIsLocating(false);
-        alert('Could not detect device GPS: ' + err.message + '. Please select your city or ensure location permissions are granted. Your saved location will work 100% offline.');
+        alert('Could not detect device location: ' + err.message + '. Please select your city or ensure location permissions are granted. Your saved location will work 100% offline.');
       },
-      { timeout: 10000, enableHighAccuracy: true }
+      { timeout: 10000, enableHighAccuracy: false }
     );
   };
 
@@ -209,6 +209,17 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
         <div className="p-5 overflow-y-auto flex-1 space-y-4">
           {activeTab === 'city' ? (
             <>
+              {/* Prominent In-App Location Disclosure (Google Play Sensitive Data Policy) */}
+              <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-800/50 text-xs text-neutral-300 space-y-1.5">
+                <div className="flex items-center gap-2 text-emerald-400 font-semibold">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Privacy Notice • Minimum Location Scope</span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-neutral-300">
+                  Approximate location is used solely on your device to calculate accurate astronomical prayer times and the Qibla compass bearing. Location data is never stored externally, never shared, and never tracked in the background. You can also pick any city manually below without granting location access.
+                </p>
+              </div>
+
               {/* GPS Auto Button */}
               <button
                 id="use-gps-btn"
@@ -217,7 +228,7 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({
                 className="w-full p-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-semibold flex items-center justify-center gap-2.5 transition-all shadow-md shadow-emerald-950/40 cursor-pointer"
               >
                 <Navigation className={`w-5 h-5 ${isLocating ? 'animate-spin' : ''}`} />
-                {isLocating ? 'Detecting GPS Coordinates...' : 'Use Current Device GPS Location'}
+                {isLocating ? 'Detecting Location Coordinates...' : 'Auto-Detect Device Location'}
               </button>
 
               {/* Quick 1-Click City Selectors */}

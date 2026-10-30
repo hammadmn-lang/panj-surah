@@ -248,15 +248,15 @@ export function App() {
       setLocation((prev) => ({ ...prev, timezone: deviceTimezone }));
     }
 
-    // If location is configured for Auto or device setting, try to get hardware GPS/network
-    if (location.isAuto && navigator.geolocation) {
+    // If location is configured for Auto and coordinates are missing, request approximate location (Minimum Scope principle)
+    if (location.isAuto && (!location.latitude || !location.longitude) && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           setLocation((prev) => ({
             ...prev,
             latitude: pos.coords.latitude,
             longitude: pos.coords.longitude,
-            city: 'Device GPS Location',
+            city: 'Device Location',
             country: (deviceTimezone || 'Local').replace(/_/g, ' '),
             isAuto: true,
             timezone: deviceTimezone || prev.timezone,
@@ -265,7 +265,7 @@ export function App() {
         () => {
           // Gracefully fallback to saved location without interrupting offline usage
         },
-        { timeout: 8000, enableHighAccuracy: true }
+        { timeout: 8000, enableHighAccuracy: false }
       );
     }
   }, []);

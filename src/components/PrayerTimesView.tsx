@@ -40,6 +40,7 @@ import { ThreeDayPrayerScheduleCard } from './ThreeDayPrayerScheduleCard';
 import { InternetUpdateModal } from './InternetUpdateModal';
 import confetti from 'canvas-confetti';
 import { WeeklyPrayerChart } from './WeeklyPrayerChart';
+import appLogo from '../assets/images/app_logo_1791491470615.jpg';
 
 interface PrayerTimesViewProps {
   location: UserLocation;
@@ -577,10 +578,13 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
         <div>
           <div className="flex items-center gap-3 mb-2">
             <img
-              src="/src/assets/images/app_logo_1791491470615.jpg"
-              alt="Panj Surah App Logo"
-              referrerPolicy="no-referrer"
-              className="w-12 h-12 rounded-2xl shadow-lg border border-emerald-600/40 object-cover shrink-0"
+              src={appLogo}
+              alt="Panj Surah"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/app-logo.jpg';
+              }}
+              className="w-12 h-12 rounded-2xl shadow-lg border border-emerald-600/40 object-cover shrink-0 bg-emerald-950"
             />
             <div>
               <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white flex flex-wrap items-center gap-2">
