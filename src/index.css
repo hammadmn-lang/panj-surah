@@ -13,6 +13,23 @@
 }
 
 /* ==========================================================================
+   DAWAT-E-ISLAMI / INDO-PAK QURAN & NASTALIQ TYPOGRAPHY
+   High legibility, authentic South Asian & classical Arabic calligraphy fonts.
+   ========================================================================== */
+.font-arabic,
+.font-mushaf {
+  font-family: 'Scheherazade New', 'Noto Naskh Arabic', 'Amiri', 'Amiri Quran', 'Traditional Arabic', serif;
+  font-feature-settings: "cv01" on, "cv02" on;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-urdu {
+  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif;
+  text-rendering: optimizeLegibility;
+}
+
+/* ==========================================================================
    LIGHT THEME (White & Emerald Green Styling Defaults)
    All dark backgrounds and dark gradients become clean, bright, white/light
    surfaces with dark, high-contrast, crystal-clear typography.

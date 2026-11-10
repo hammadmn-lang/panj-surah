@@ -15,6 +15,7 @@ import {
   Layers,
   Sliders,
   RotateCcw,
+  Printer,
 } from 'lucide-react';
 import { MANZIL_COLLECTION, ManzilSection } from '../data/manzilData';
 import confetti from 'canvas-confetti';
@@ -176,6 +177,15 @@ export const ManzilReaderModal: React.FC<ManzilReaderModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              title="Print or Save Manzil as PDF"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Save / Print PDF</span>
+            </button>
+
             <button
               onClick={handleCopyAll}
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-medium transition-colors cursor-pointer"
@@ -445,10 +455,10 @@ export const ManzilReaderModal: React.FC<ManzilReaderModalProps> = ({
                     {/* Urdu Translation */}
                     {showUrdu && item.urduTranslation && (
                       <div className="mt-3 p-3 rounded-2xl bg-emerald-950/30 border border-emerald-900/40 text-right dir-rtl">
-                        <strong className="text-emerald-400 text-xs font-semibold block mb-1">
-                          اردو ترجمہ:
+                        <strong className="text-emerald-400 text-xs font-semibold block mb-1 font-sans">
+                          اردو ترجمہ (کنز الایمان):
                         </strong>
-                        <p className="font-arabic text-neutral-200 text-base leading-relaxed">
+                        <p className="font-urdu text-neutral-200 text-base leading-relaxed">
                           {item.urduTranslation}
                         </p>
                       </div>
@@ -524,8 +534,8 @@ export const ManzilReaderModal: React.FC<ManzilReaderModalProps> = ({
                 {/* Urdu */}
                 {showUrdu && currentItem.urduTranslation && (
                   <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-900/50 text-right dir-rtl">
-                    <span className="text-emerald-400 block font-semibold text-xs mb-1">اردو ترجمہ:</span>
-                    <p className="font-arabic text-neutral-200 text-base leading-relaxed">
+                    <span className="text-emerald-400 block font-semibold text-xs mb-1 font-sans">اردو ترجمہ (کنز الایمان):</span>
+                    <p className="font-urdu text-neutral-200 text-base leading-relaxed">
                       {currentItem.urduTranslation}
                     </p>
                   </div>

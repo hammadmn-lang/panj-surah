@@ -65,10 +65,10 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
   const AYAT_PER_PAGE = 11;
   const isAllTranslationsOff = !showTranslation && !showTransliteration;
 
-  // Auto set font to 14 when all translations are switched off
+  // Set comfortable Mushaf font size when in continuous Arabic mode
   useEffect(() => {
     if (isAllTranslationsOff) {
-      setFontSize(14);
+      setFontSize(userProfile.fontSizeArabic || 28);
       setCurrentPage(1);
     }
   }, [isAllTranslationsOff]);
@@ -288,31 +288,31 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
               <Type className="w-4 h-4 text-neutral-400" />
               <span className="font-medium text-neutral-300">Arabic Size:</span>
               <button
-                onClick={() => setFontSize((f) => Math.max(12, f - 2))}
+                onClick={() => setFontSize((f) => Math.max(18, f - 2))}
                 className="px-2 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold"
               >
                 -
               </button>
               <span className="font-mono font-bold text-emerald-400">{fontSize}px</span>
               <button
-                onClick={() => setFontSize((f) => Math.min(46, f + 2))}
+                onClick={() => setFontSize((f) => Math.min(48, f + 2))}
                 className="px-2 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold"
               >
                 +
               </button>
             </div>
 
-            {/* Quick 11 Ayat / Page (Arabic Only) Mode Toggle */}
+            {/* Quick 16-Line Mushaf (Arabic Only) Mode Toggle */}
             <button
               onClick={() => {
                 if (isAllTranslationsOff) {
                   setShowTranslation(true);
                   setShowTransliteration(true);
-                  setFontSize(28);
+                  setFontSize(userProfile.fontSizeArabic || 28);
                 } else {
                   setShowTranslation(false);
                   setShowTransliteration(false);
-                  setFontSize(14);
+                  setFontSize(userProfile.fontSizeArabic || 28);
                   setCurrentPage(1);
                 }
               }}
@@ -321,10 +321,10 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
                   ? 'bg-emerald-600 text-white shadow-sm'
                   : 'bg-emerald-100 text-emerald-900 border border-emerald-300 hover:bg-emerald-200 dark:bg-neutral-800 dark:text-neutral-300'
               }`}
-              title="When all translations are switched off, default font is 14 and exactly 11 ayat per page are displayed"
+              title="Toggle continuous Dawat-e-Islami 16-line Holy Mushaf recitation mode"
             >
               <BookOpen className="w-3.5 h-3.5" />
-              <span>{isAllTranslationsOff ? '📖 11 Ayat/Page Active (Font 14)' : '📖 Switch to 11 Ayat/Page (No Translation)'}</span>
+              <span>{isAllTranslationsOff ? '📖 16-Line Mushaf Active' : '📖 16-Line Mushaf Mode'}</span>
             </button>
 
             {/* Toggle Transliteration & Translation & Translation Language */}
@@ -567,18 +567,18 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
                     </div>
                   </div>
 
-                  {/* Mushaf Page Container (11 Ayat styled at font size 14) */}
+                  {/* Mushaf Page Container (16-Line Holy Mushaf Style) */}
                   <div className="bg-white rounded-3xl border-2 border-emerald-600/30 p-6 sm:p-9 shadow-md relative dark:bg-neutral-900/90 dark:border-emerald-800/50">
                     <div className="border-b border-emerald-200/60 pb-3 mb-6 flex items-center justify-between text-xs text-emerald-900 font-bold dark:text-emerald-400">
                       <span>سُورَةُ {selectedSurah.nameArabic}</span>
                       <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-800 font-mono dark:bg-neutral-800 dark:text-neutral-300">
-                        11 Ayat / Page Mode (Font: {fontSize}px)
+                        16-Line Mushaf Mode • Page {currentPage} of {totalPages} ({fontSize}px)
                       </span>
                       <span>{selectedSurah.nameTransliteration}</span>
                     </div>
 
                     <div
-                      className="font-arabic text-right text-slate-900 leading-[2.5] space-y-3 dark:text-neutral-100"
+                      className="font-mushaf font-arabic text-right text-slate-900 leading-[3.0] space-y-3 dark:text-neutral-100"
                       dir="rtl"
                       style={{ fontSize: `${fontSize}px` }}
                     >
