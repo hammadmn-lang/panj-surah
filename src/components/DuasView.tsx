@@ -16,6 +16,9 @@ import {
 import { DuaCategory, DuaItem, UserProfile } from '../types';
 import { DUAS_COLLECTION } from '../data/duas';
 import { ManzilReaderModal } from './ManzilReaderModal';
+import { DuaJameelaView } from './DuaJameelaView';
+import { AllahNamesView } from './AllahNamesView';
+import { ProphetNamesView } from './ProphetNamesView';
 import confetti from 'canvas-confetti';
 
 interface DuasViewProps {
@@ -53,6 +56,9 @@ export const DuasView: React.FC<DuasViewProps> = ({
   onRecordManzilSectionRead,
   onRecordManzilFullCompletion,
 }) => {
+  const [activeSectionTab, setActiveSectionTab] = useState<
+    'all' | 'dua-jameela' | 'allah-names' | 'prophet-names' | 'manzil'
+  >('all');
   const [selectedCategory, setSelectedCategory] = useState<DuaCategory>('All');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -145,16 +151,137 @@ export const DuasView: React.FC<DuasViewProps> = ({
 
   return (
     <div className="space-y-6 pb-20 sm:pb-12 max-w-4xl mx-auto px-2 sm:px-0 animate-fade-in">
-      {/* Hero Header */}
-      <div
-        className={`rounded-3xl p-6 sm:p-8 shadow-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 transition-all ${
-          isBright
-            ? 'bg-white border-2 border-black text-black shadow-md ring-1 ring-black'
-            : isDark
-            ? 'bg-gradient-to-r from-neutral-900 via-neutral-900 to-neutral-950 text-white border-neutral-800'
-            : 'bg-emerald-50/80 border-2 border-emerald-200 text-slate-900'
-        }`}
-      >
+      {/* Top Primary Navigation Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin no-scrollbar print:hidden">
+        <button
+          id="tab-btn-all-duas"
+          onClick={() => setActiveSectionTab('all')}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer shrink-0 shadow-xs ${
+            activeSectionTab === 'all'
+              ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-500/50'
+              : isBright
+              ? 'bg-white text-black border border-slate-300 hover:border-black'
+              : isDark
+              ? 'bg-neutral-900 text-neutral-300 border border-neutral-800 hover:bg-neutral-800 hover:text-white'
+              : 'bg-white text-slate-800 border border-emerald-200 hover:bg-emerald-50'
+          }`}
+        >
+          <BookOpen className="w-4 h-4 text-emerald-400" />
+          <span>All Duas (تمام مسنون دعائیں)</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 font-mono">
+            {DUAS_COLLECTION.length}
+          </span>
+        </button>
+
+        <button
+          id="tab-btn-dua-jameela"
+          onClick={() => setActiveSectionTab('dua-jameela')}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer shrink-0 shadow-xs ${
+            activeSectionTab === 'dua-jameela'
+              ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-500/50'
+              : isBright
+              ? 'bg-white text-black border border-slate-300 hover:border-black'
+              : isDark
+              ? 'bg-neutral-900 text-neutral-300 border border-neutral-800 hover:bg-neutral-800 hover:text-white'
+              : 'bg-white text-slate-800 border border-emerald-200 hover:bg-emerald-50'
+          }`}
+        >
+          <Sparkles className="w-4 h-4 text-amber-400" />
+          <span>Dua Jamila (دعائے جمیلہ)</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-950/60 text-amber-300 font-mono">
+            48 Asma
+          </span>
+        </button>
+
+        <button
+          id="tab-btn-allah-names"
+          onClick={() => setActiveSectionTab('allah-names')}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer shrink-0 shadow-xs ${
+            activeSectionTab === 'allah-names'
+              ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-500/50'
+              : isBright
+              ? 'bg-white text-black border border-slate-300 hover:border-black'
+              : isDark
+              ? 'bg-neutral-900 text-neutral-300 border border-neutral-800 hover:bg-neutral-800 hover:text-white'
+              : 'bg-white text-slate-800 border border-emerald-200 hover:bg-emerald-50'
+          }`}
+        >
+          <Sparkles className="w-4 h-4 text-emerald-400" />
+          <span>ALLAH NAMES with its meaning (اسماء الحسنى)</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 font-mono">
+            99
+          </span>
+        </button>
+
+        <button
+          id="tab-btn-prophet-names"
+          onClick={() => setActiveSectionTab('prophet-names')}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer shrink-0 shadow-xs ${
+            activeSectionTab === 'prophet-names'
+              ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-500/50'
+              : isBright
+              ? 'bg-white text-black border border-slate-300 hover:border-black'
+              : isDark
+              ? 'bg-neutral-900 text-neutral-300 border border-neutral-800 hover:bg-neutral-800 hover:text-white'
+              : 'bg-white text-slate-800 border border-emerald-200 hover:bg-emerald-50'
+          }`}
+        >
+          <Heart className="w-4 h-4 text-rose-400 fill-rose-500/20" />
+          <span>Muhammad NAME with its meaning (اسمائے مصطفیٰ ﷺ)</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-rose-950/60 text-rose-300 font-mono">
+            99 ﷺ
+          </span>
+        </button>
+
+        <button
+          id="tab-btn-manzil"
+          onClick={() => {
+            setActiveSectionTab('manzil');
+            setIsManzilReaderOpen(true);
+          }}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer shrink-0 shadow-xs ${
+            activeSectionTab === 'manzil'
+              ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-500/50'
+              : isBright
+              ? 'bg-white text-black border border-slate-300 hover:border-black'
+              : isDark
+              ? 'bg-neutral-900 text-neutral-300 border border-neutral-800 hover:bg-neutral-800 hover:text-white'
+              : 'bg-white text-slate-800 border border-emerald-200 hover:bg-emerald-50'
+          }`}
+        >
+          <Shield className="w-4 h-4 text-teal-400" />
+          <span>Manzil (منزل مبارک)</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-950/60 text-teal-300 font-mono">
+            33 Ayat
+          </span>
+        </button>
+      </div>
+
+      {/* Render Selected View */}
+      {activeSectionTab === 'dua-jameela' && (
+        <DuaJameelaView isDark={isDark} isBright={isBright} />
+      )}
+
+      {activeSectionTab === 'allah-names' && (
+        <AllahNamesView isDark={isDark} isBright={isBright} />
+      )}
+
+      {activeSectionTab === 'prophet-names' && (
+        <ProphetNamesView isDark={isDark} isBright={isBright} />
+      )}
+
+      {(activeSectionTab === 'all' || activeSectionTab === 'manzil') && (
+        <>
+          {/* Hero Header */}
+          <div
+            className={`rounded-3xl p-6 sm:p-8 shadow-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 transition-all ${
+              isBright
+                ? 'bg-white border-2 border-black text-black shadow-md ring-1 ring-black'
+                : isDark
+                ? 'bg-gradient-to-r from-neutral-900 via-neutral-900 to-neutral-950 text-white border-neutral-800'
+                : 'bg-emerald-50/80 border-2 border-emerald-200 text-slate-900'
+            }`}
+          >
         <div className="space-y-1.5">
           <div
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
@@ -847,6 +974,8 @@ export const DuasView: React.FC<DuasViewProps> = ({
           })
         )}
       </div>
+    </>
+  )}
 
       {/* Dedicated Full Manzil Reader Modal */}
       <ManzilReaderModal

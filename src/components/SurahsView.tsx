@@ -21,6 +21,7 @@ import {
   Layers,
   ArrowRight,
   FileText,
+  X,
 } from 'lucide-react';
 import { Surah, UserProfile } from '../types';
 import { SURAHS_DATA } from '../data/surahs';
@@ -31,13 +32,27 @@ import confetti from 'canvas-confetti';
 interface SurahsViewProps {
   userProfile: UserProfile;
   onToggleSurahCompleted: (surahId: number, details?: { name: string; arabic: string }) => void;
+  initialSearchTerm?: string;
 }
 
-export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSurahCompleted }) => {
+export const SurahsView: React.FC<SurahsViewProps> = ({
+  userProfile,
+  onToggleSurahCompleted,
+  initialSearchTerm = '',
+}) => {
   const [activeFilter, setActiveFilter] = useState<'panj' | 'beginner' | 'all'>('panj');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [selectedSurah, setSelectedSurah] = useState<Surah | null>(null);
   const [pdfModalSurah, setPdfModalSurah] = useState<Surah | null>(null);
+  const [isQuickSwitchOpen, setIsQuickSwitchOpen] = useState(false);
+  const [quickSwitchSearch, setQuickSwitchSearch] = useState('');
+
+  useEffect(() => {
+    if (initialSearchTerm) {
+      setSearchTerm(initialSearchTerm);
+      setActiveFilter('all');
+    }
+  }, [initialSearchTerm]);
 
   // Audio Player State
   const [isPlaying, setIsPlaying] = useState(false);
@@ -240,6 +255,18 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
 
             {/* PDF View & Read / Memorized Toggle */}
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setQuickSwitchSearch('');
+                  setIsQuickSwitchOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-neutral-800 text-neutral-200 border border-neutral-700 hover:bg-neutral-700 transition-all cursor-pointer"
+                title="Search and jump directly to another Surah without closing"
+              >
+                <Search className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Search Surah</span>
+              </button>
+
               <button
                 onClick={() => setPdfModalSurah(selectedSurah)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition-all cursor-pointer dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/60"
@@ -645,11 +672,14 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
                     </span>
 
                     <div
-                      className="font-arabic text-right text-neutral-100 flex-1 leading-loose"
+                      className="font-mushaf font-arabic text-right text-slate-900 dark:text-neutral-100 flex-1 leading-[2.8]"
                       style={{ fontSize: `${fontSize}px` }}
                       dir="rtl"
                     >
-                      {verse.textArabic}
+                      {verse.textArabic}{' '}
+                      <span className="inline-flex items-center justify-center mx-1.5 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-950 text-xs font-mono font-bold border border-emerald-300 select-none dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-700">
+                        ۝ {verse.number}
+                      </span>
                     </div>
                   </div>
 
@@ -717,17 +747,68 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
               </div>
 
               {/* Search */}
-              <div className="relative w-full sm:w-64">
+              <div className="relative w-full sm:w-80">
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
                 <input
                   id="search-surahs-input"
                   type="text"
-                  placeholder="Search Surah by name..."
+                  placeholder="Search Surah by name, #number, or meaning..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-neutral-800 border border-neutral-700 text-xs text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-xs text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all shadow-inner"
                 />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
+            </div>
+
+            {/* Quick Search Chips */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar">
+              <span className="text-neutral-400 text-xs font-semibold shrink-0">Quick Search:</span>
+              {[
+                { name: 'Yaseen', query: 'Yaseen', num: '36' },
+                { name: 'Al-Mulk', query: 'Mulk', num: '67' },
+                { name: 'Ar-Rahman', query: 'Rahman', num: '55' },
+                { name: 'Al-Kahf', query: 'Kahf', num: '18' },
+                { name: 'Al-Waqi‘ah', query: 'Waqi', num: '56' },
+                { name: 'Al-Fatihah', query: 'Fatihah', num: '1' },
+                { name: 'Al-Ikhlas', query: 'Ikhlas', num: '112' },
+                { name: 'Al-Baqarah', query: 'Baqarah', num: '2' },
+              ].map((chip) => {
+                const isActive = searchTerm.toLowerCase().includes(chip.query.toLowerCase());
+                return (
+                  <button
+                    key={chip.name}
+                    onClick={() => {
+                      setSearchTerm(chip.query);
+                      setActiveFilter('all');
+                    }}
+                    className={`px-2.5 py-1 rounded-xl border transition-all shrink-0 cursor-pointer flex items-center gap-1 ${
+                      isActive
+                        ? 'bg-emerald-600 text-white border-emerald-500 font-bold shadow-xs'
+                        : 'bg-neutral-800/80 text-neutral-300 border-neutral-700/60 hover:bg-neutral-700 hover:text-white'
+                    }`}
+                  >
+                    <span>{chip.name}</span>
+                    <span className="opacity-60 text-[10px] font-mono">#{chip.num}</span>
+                  </button>
+                );
+              })}
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="px-2.5 py-1 rounded-xl bg-neutral-800 text-neutral-400 hover:text-white text-[11px] font-medium shrink-0 cursor-pointer"
+                >
+                  Clear ({filteredSurahs.length} found)
+                </button>
+              )}
             </div>
 
             {/* Filter Pills */}
@@ -912,6 +993,112 @@ export const SurahsView: React.FC<SurahsViewProps> = ({ userProfile, onToggleSur
             })}
           </div>
         </>
+      )}
+
+      {/* Quick Switch / Search Surah Modal when in Reader View */}
+      {isQuickSwitchOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
+          onClick={() => setIsQuickSwitchOpen(false)}
+        >
+          <div
+            className="w-full max-w-lg bg-neutral-900 border border-neutral-800 rounded-3xl p-5 shadow-2xl space-y-4 max-h-[85vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
+              <div className="flex items-center gap-2">
+                <Search className="w-5 h-5 text-emerald-400" />
+                <h3 className="font-bold font-serif text-white text-base">
+                  Search &amp; Switch Surah (سورۃ تلاش کریں)
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsQuickSwitchOpen(false)}
+                className="p-1.5 rounded-xl bg-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Search Input */}
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+              <input
+                type="text"
+                autoFocus
+                placeholder="Type Surah name or number (e.g. Yaseen, 67, Mulk)..."
+                value={quickSwitchSearch}
+                onChange={(e) => setQuickSwitchSearch(e.target.value)}
+                className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500"
+              />
+              {quickSwitchSearch && (
+                <button
+                  onClick={() => setQuickSwitchSearch('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Quick Suggestions */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar">
+              {['Yaseen', 'Mulk', 'Rahman', 'Kahf', 'Waqiah', 'Ikhlas'].map((q) => (
+                <button
+                  key={q}
+                  onClick={() => setQuickSwitchSearch(q)}
+                  className="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs shrink-0 cursor-pointer"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+
+            {/* Results List */}
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+              {SURAHS_DATA.filter((s) => {
+                if (!quickSwitchSearch.trim()) return true;
+                const term = quickSwitchSearch.toLowerCase();
+                return (
+                  s.number.toString().includes(term) ||
+                  s.nameTransliteration.toLowerCase().includes(term) ||
+                  s.nameArabic.includes(quickSwitchSearch) ||
+                  s.nameEnglish.toLowerCase().includes(term)
+                );
+              }).map((surah) => (
+                <div
+                  key={surah.id}
+                  onClick={() => {
+                    handleOpenSurah(surah);
+                    setIsQuickSwitchOpen(false);
+                  }}
+                  className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                    selectedSurah?.id === surah.id
+                      ? 'bg-emerald-950/70 border-emerald-500 text-white'
+                      : 'bg-neutral-950/50 border-neutral-800 hover:bg-neutral-800 text-neutral-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-lg bg-neutral-800 border border-neutral-700 text-emerald-400 font-mono text-xs font-bold flex items-center justify-center shrink-0">
+                      #{surah.number}
+                    </span>
+                    <div>
+                      <div className="font-semibold text-xs text-white">
+                        Surah {surah.nameTransliteration}
+                      </div>
+                      <div className="text-[11px] text-neutral-400">
+                        {surah.nameEnglish} • {surah.versesCount} Ayat
+                      </div>
+                    </div>
+                  </div>
+                  <div className="font-mushaf font-arabic text-lg text-emerald-300" dir="rtl">
+                    {surah.nameArabic}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* In-App PDF Mushaf Viewer Modal for Big Surahs */}

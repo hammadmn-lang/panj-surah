@@ -24,6 +24,8 @@ import {
   HardDrive,
   ShieldCheck,
   RefreshCw,
+  Search,
+  BookOpen,
 } from 'lucide-react';
 import { HijriDate } from '../utils/hijriCalendar';
 import { CalculationSettings, IslamicEvent, OfflinePrayerSyncStatus, PrayerItem, PrayerKey, ThreeDayPrayerCache, UserLocation, UserProfile } from '../types';
@@ -40,7 +42,8 @@ import { ThreeDayPrayerScheduleCard } from './ThreeDayPrayerScheduleCard';
 import { InternetUpdateModal } from './InternetUpdateModal';
 import confetti from 'canvas-confetti';
 import { WeeklyPrayerChart } from './WeeklyPrayerChart';
-import appLogo from '../assets/images/app_logo_1791491470615.jpg';
+import { AppLogo } from './AppLogo';
+import { DailyHadithCard } from './DailyHadithCard';
 
 interface PrayerTimesViewProps {
   location: UserLocation;
@@ -60,6 +63,7 @@ interface PrayerTimesViewProps {
   syncStatus?: OfflinePrayerSyncStatus;
   onRefreshOnlineSync?: () => void;
   onQuickSelectLocation?: (newLoc: UserLocation) => void;
+  onOpenSurahSearch?: (term?: string) => void;
 }
 
 export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
@@ -78,7 +82,9 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
   syncStatus: propSyncStatus,
   onRefreshOnlineSync,
   onQuickSelectLocation,
+  onOpenSurahSearch,
 }) => {
+  const [dashboardSurahQuery, setDashboardSurahQuery] = useState('');
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [alarmSettings, setAlarmSettings] = useState<Record<PrayerKey, boolean>>({
     fajr: true,
@@ -577,15 +583,7 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
       <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <img
-              src={appLogo}
-              alt="Panj Surah"
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = '/app-logo.jpg';
-              }}
-              className="w-12 h-12 rounded-2xl shadow-lg border border-emerald-600/40 object-cover shrink-0 bg-emerald-950"
-            />
+            <AppLogo className="w-12 h-12 rounded-2xl" />
             <div>
               <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white flex flex-wrap items-center gap-2">
                 Panj Surah
@@ -854,6 +852,105 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
         >
           Open Fasting Tracker →
         </button>
+      </div>
+
+      {/* Daily Authentic Hadith Inspiration (Sahih Bukhari & Muslim) */}
+      <DailyHadithCard
+        isDark={isDark}
+        isBright={isBright}
+        onOpenSurahSearch={() => (onOpenSurahSearch ? onOpenSurahSearch() : onNavigateTab('surahs'))}
+      />
+
+      {/* Quick Search Surah & Reciter Bar on Dashboard */}
+      <div
+        className={`p-5 sm:p-6 rounded-3xl border shadow-lg space-y-3.5 transition-all ${
+          isBright
+            ? 'bg-white border-2 border-black text-black'
+            : isDark
+            ? 'bg-neutral-900 border-neutral-800 text-white'
+            : 'bg-white border-2 border-emerald-200 text-slate-900'
+        }`}
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-950/80 border border-emerald-800/80 text-emerald-400 flex items-center justify-center shrink-0 shadow-inner">
+              <Search className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider font-mono text-emerald-400">
+                  Quran Reader • تلاوتِ قرآن
+                </span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 font-mono font-bold border border-emerald-800">
+                  114 Surahs
+                </span>
+              </div>
+              <h3 className="text-base sm:text-lg font-bold font-serif text-white">
+                Search Surah (سورۃ تلاش کریں)
+              </h3>
+            </div>
+          </div>
+
+          {/* Search Form */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (onOpenSurahSearch) {
+                onOpenSurahSearch(dashboardSurahQuery);
+              } else {
+                onNavigateTab('surahs');
+              }
+            }}
+            className="flex items-center gap-2 w-full sm:w-auto"
+          >
+            <div className="relative flex-1 sm:w-72">
+              <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={dashboardSurahQuery}
+                onChange={(e) => setDashboardSurahQuery(e.target.value)}
+                placeholder="Type Surah name or number (e.g. Yaseen, 67, Mulk)..."
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500 transition-all shadow-inner"
+              />
+            </div>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold transition-all shadow-md shrink-0 cursor-pointer flex items-center gap-1.5"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Search</span>
+            </button>
+          </form>
+        </div>
+
+        {/* Popular Surah Quick Jump Chips */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar pt-1 border-t border-neutral-800/60">
+          <span className="text-neutral-400 text-[11px] font-semibold shrink-0">Popular:</span>
+          {[
+            { label: 'Yaseen', query: 'Yaseen', num: '36' },
+            { label: 'Al-Mulk', query: 'Mulk', num: '67' },
+            { label: 'Ar-Rahman', query: 'Rahman', num: '55' },
+            { label: 'Al-Kahf', query: 'Kahf', num: '18' },
+            { label: 'Al-Waqi‘ah', query: 'Waqi', num: '56' },
+            { label: 'Al-Fatihah', query: 'Fatihah', num: '1' },
+            { label: 'Al-Ikhlas', query: 'Ikhlas', num: '112' },
+          ].map((item) => (
+            <button
+              key={item.label}
+              onClick={() => {
+                if (onOpenSurahSearch) {
+                  onOpenSurahSearch(item.query);
+                } else {
+                  onNavigateTab('surahs');
+                }
+              }}
+              className="px-2.5 py-1 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white border border-neutral-700/60 text-xs font-medium flex items-center gap-1 shrink-0 cursor-pointer transition-colors"
+            >
+              <span>{item.label}</span>
+              <span className="opacity-60 text-[10px] font-mono">#{item.num}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Visual Prayer Tracker (5 Daily Prayers) */}
@@ -1215,12 +1312,12 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
           <div className="w-10 h-10 rounded-2xl bg-emerald-900/30 border border-emerald-800/40 text-emerald-400 flex items-center justify-center font-bold mb-3 group-hover:scale-105 transition-transform">
             <span className="font-arabic text-lg">دعاء</span>
           </div>
-          <h4 className="font-semibold text-white text-base">Masnoon Duas</h4>
+          <h4 className="font-semibold text-white text-base">Duas, Dua Jameela &amp; 99 Names</h4>
           <p className="text-xs text-neutral-400 mt-1">
-            Morning, distress relief, health, travel, parents & protection
+            Dua Jameela, 99 Names of Allah &amp; Prophet ﷺ, Manzil, and daily Masnoon supplications
           </p>
           <div className="mt-3 text-xs font-semibold text-emerald-400 flex items-center gap-1">
-            Explore Duas <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            Recite &amp; Learn <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </div>
         </button>
       </div>

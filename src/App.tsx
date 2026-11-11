@@ -241,6 +241,14 @@ export function App() {
     checkThreeDaySyncStatus(userProfile.prayerTimesLastOnlineSync)
   );
 
+  // Search Surah query state passed to SurahsView
+  const [surahSearchInitial, setSurahSearchInitial] = useState<string>('');
+
+  const handleOpenSurahSearch = (term: string = '') => {
+    setSurahSearchInitial(term);
+    setActiveTab('surahs');
+  };
+
   // Auto-pick local device time, timezone & location setting so it remains accurate offline
   useEffect(() => {
     const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -706,6 +714,7 @@ export function App() {
               localStorage.setItem('panj_surah_location', JSON.stringify(newLoc));
               setHijriDate(getHijriDate(new Date(), userProfile.hijriDayAdjustment, newLoc, newLoc.city));
             }}
+            onOpenSurahSearch={handleOpenSurahSearch}
           />
         )}
 
@@ -713,6 +722,7 @@ export function App() {
           <SurahsView
             userProfile={userProfile}
             onToggleSurahCompleted={handleToggleSurahCompleted}
+            initialSearchTerm={surahSearchInitial}
           />
         )}
 
