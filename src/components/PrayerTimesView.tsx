@@ -930,8 +930,11 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
             { label: 'Yaseen', query: 'Yaseen', num: '36' },
             { label: 'Al-Mulk', query: 'Mulk', num: '67' },
             { label: 'Ar-Rahman', query: 'Rahman', num: '55' },
-            { label: 'Al-Kahf', query: 'Kahf', num: '18' },
             { label: 'Al-Waqi‘ah', query: 'Waqi', num: '56' },
+            { label: 'Al-Muzzammil', query: 'Muzzammil', num: '73' },
+            { label: 'Al-Kahf', query: 'Kahf', num: '18' },
+            { label: 'As-Sajdah', query: 'Sajdah', num: '32' },
+            { label: 'Al-Fath', query: 'Fath', num: '48' },
             { label: 'Al-Fatihah', query: 'Fatihah', num: '1' },
             { label: 'Al-Ikhlas', query: 'Ikhlas', num: '112' },
           ].map((item) => (

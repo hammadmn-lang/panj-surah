@@ -15,11 +15,11 @@
 /* ==========================================================================
    DAWAT-E-ISLAMI / INDO-PAK QURAN & NASTALIQ TYPOGRAPHY
    High legibility, authentic South Asian & classical Arabic calligraphy fonts.
+   Uses Amiri Quran, Amiri, and Noto Naskh Arabic without glyph distortions.
    ========================================================================== */
 .font-arabic,
 .font-mushaf {
-  font-family: 'Scheherazade New', 'Noto Naskh Arabic', 'Amiri', 'Amiri Quran', 'Traditional Arabic', serif;
-  font-feature-settings: "cv01" on, "cv02" on;
+  font-family: 'Amiri Quran', 'Amiri', 'Noto Naskh Arabic', 'Scheherazade New', 'Traditional Arabic', serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }

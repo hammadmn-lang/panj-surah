@@ -15,7 +15,25 @@ export const SurahPdfViewerModal: React.FC<SurahPdfViewerModalProps> = ({
 }) => {
   const printAreaRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<'mushaf' | 'study'>('mushaf');
-  const [fontSize, setFontSize] = useState<'medium' | 'large' | 'extra-large'>('large');
+  const [fontSize, setFontSize] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('panj_surah_pdf_font_size');
+      if (saved) {
+        const val = parseInt(saved, 10);
+        if (val >= 12 && val <= 48) return val;
+      }
+    } catch {}
+    return 28;
+  });
+
+  const handleUpdatePdfFontSize = (newSize: number) => {
+    const clamped = Math.max(12, Math.min(48, newSize));
+    setFontSize(clamped);
+    try {
+      localStorage.setItem('panj_surah_pdf_font_size', String(clamped));
+    } catch {}
+  };
+
   const [showUrdu, setShowUrdu] = useState<boolean>(true);
   const [showEnglish, setShowEnglish] = useState<boolean>(false);
   const [showTransliteration, setShowTransliteration] = useState<boolean>(false);
@@ -28,17 +46,6 @@ export const SurahPdfViewerModal: React.FC<SurahPdfViewerModalProps> = ({
 
   const handlePrintPdf = () => {
     window.print();
-  };
-
-  const getArabicSizeClass = () => {
-    switch (fontSize) {
-      case 'medium':
-        return 'text-2xl sm:text-3xl leading-[2.6]';
-      case 'large':
-        return 'text-3xl sm:text-4xl leading-[3.0] font-medium';
-      case 'extra-large':
-        return 'text-4xl sm:text-5xl leading-[3.4] font-semibold';
-    }
   };
 
   const isMakki = surah.revelationType.toLowerCase().includes('mecc');
@@ -96,41 +103,43 @@ export const SurahPdfViewerModal: React.FC<SurahPdfViewerModalProps> = ({
               </button>
             </div>
 
-            {/* Font Size Selector (Medium, Large, Extra-Large) */}
-            <div className="flex items-center rounded-xl bg-white border border-emerald-300 p-0.5 shadow-sm text-xs font-semibold">
+            {/* Font Size Selector (Allows reducing below 16 down to 12px) */}
+            <div className="flex items-center rounded-xl bg-white border border-emerald-300 p-1 shadow-sm text-xs font-semibold gap-1">
+              <span className="text-[11px] text-slate-600 font-sans px-1">Size:</span>
               <button
-                onClick={() => setFontSize('medium')}
-                className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  fontSize === 'medium'
-                    ? 'bg-emerald-700 text-white shadow-sm'
-                    : 'text-slate-700 hover:text-emerald-900'
-                }`}
-                title="Standard font size"
+                onClick={() => handleUpdatePdfFontSize(fontSize - 2)}
+                className="w-6 h-6 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center justify-center font-bold cursor-pointer"
+                title="Reduce font size (minimum 12px)"
               >
-                Normal
+                -
               </button>
+              <span className="font-mono text-emerald-950 font-bold px-1 min-w-[34px] text-center">
+                {fontSize}px
+              </span>
               <button
-                onClick={() => setFontSize('large')}
-                className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  fontSize === 'large'
-                    ? 'bg-emerald-700 text-white shadow-sm'
-                    : 'text-slate-700 hover:text-emerald-900'
-                }`}
-                title="Large readable font (Recommended)"
+                onClick={() => handleUpdatePdfFontSize(fontSize + 2)}
+                className="w-6 h-6 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center justify-center font-bold cursor-pointer"
+                title="Increase font size"
               >
-                Large
+                +
               </button>
-              <button
-                onClick={() => setFontSize('extra-large')}
-                className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  fontSize === 'extra-large'
-                    ? 'bg-emerald-700 text-white shadow-sm'
-                    : 'text-slate-700 hover:text-emerald-900'
-                }`}
-                title="Extra large font for easy reading"
-              >
-                Extra Large
-              </button>
+
+              <div className="hidden sm:flex items-center gap-1 pl-1 border-l border-emerald-200">
+                {[12, 16, 22, 28, 36].map((sz) => (
+                  <button
+                    key={sz}
+                    onClick={() => handleUpdatePdfFontSize(sz)}
+                    className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold transition-all cursor-pointer ${
+                      fontSize === sz
+                        ? 'bg-emerald-700 text-white shadow-xs'
+                        : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+                    }`}
+                    title={`Set font to ${sz}px`}
+                  >
+                    {sz}px
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Translation Toggles when in Verse-by-Verse mode */}
@@ -220,10 +229,10 @@ export const SurahPdfViewerModal: React.FC<SurahPdfViewerModalProps> = ({
                 {pageNumber === 1 && surah.number !== 9 && (
                   <div className="text-center py-5 mb-6 border-y-2 border-dashed border-emerald-600/30 bg-emerald-50/40 rounded-xl">
                     <div className="font-mushaf font-arabic text-3xl sm:text-4xl text-emerald-950 font-bold leading-relaxed tracking-wide">
-                      بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                      بِسۡمِ اللهِ الرَّحۡمٰنِ الرَّحِيۡمِ
                     </div>
                     <div className="font-urdu text-xs text-emerald-900/80 mt-1">
-                      اللہ کے نام سے شروع جو نہایت مہربان، ہمیشہ رحم فرمانے والا ہے (کنز الایمان)
+                      اللہ کے نام سے شروع جو بہت مہربان رحمت والا (کنز الایمان)
                     </div>
                   </div>
                 )}
@@ -232,7 +241,8 @@ export const SurahPdfViewerModal: React.FC<SurahPdfViewerModalProps> = ({
                 {viewMode === 'mushaf' ? (
                   /* 16-Line Continuous Mushaf Flow */
                   <div
-                    className={`font-mushaf font-arabic text-right text-slate-950 text-justify tracking-wide ${getArabicSizeClass()}`}
+                    className="font-mushaf font-arabic text-right text-slate-950 text-justify tracking-wide"
+                    style={{ fontSize: `${fontSize}px`, lineHeight: 2.2 }}
                     dir="rtl"
                   >
                     {pageVerses.map((verse) => (
@@ -260,7 +270,8 @@ export const SurahPdfViewerModal: React.FC<SurahPdfViewerModalProps> = ({
                             {verse.number}
                           </span>
                           <div
-                            className={`font-mushaf font-arabic text-right text-slate-950 flex-1 ${getArabicSizeClass()}`}
+                            className="font-mushaf font-arabic text-right text-slate-950 flex-1"
+                            style={{ fontSize: `${fontSize}px`, lineHeight: 2.2 }}
                             dir="rtl"
                           >
                             {verse.textArabic}
@@ -274,13 +285,15 @@ export const SurahPdfViewerModal: React.FC<SurahPdfViewerModalProps> = ({
                           </div>
                         )}
 
-                        {/* Urdu Translation (Kanzul Iman / Dawat-e-Islami Style) */}
+                        {/* Urdu Translation (Kanzul Iman / Dawat-e-Islami Standard) */}
                         {showUrdu && verse.translationUr && (
                           <div
                             className="font-urdu text-right text-emerald-950 text-sm sm:text-base leading-relaxed border-t border-emerald-100 pt-2"
                             dir="rtl"
                           >
-                            <span className="text-xs text-emerald-700 font-sans font-bold ml-2">ترجمہ:</span>
+                            <span className="text-xs text-emerald-800 font-sans font-bold bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300 ml-2">
+                              ترجمہ کنز الایمان:
+                            </span>
                             {verse.translationUr}
                           </div>
                         )}

@@ -33,12 +33,14 @@ interface SurahsViewProps {
   userProfile: UserProfile;
   onToggleSurahCompleted: (surahId: number, details?: { name: string; arabic: string }) => void;
   initialSearchTerm?: string;
+  onUpdateProfile?: (updated: Partial<UserProfile>) => void;
 }
 
 export const SurahsView: React.FC<SurahsViewProps> = ({
   userProfile,
   onToggleSurahCompleted,
   initialSearchTerm = '',
+  onUpdateProfile,
 }) => {
   const [activeFilter, setActiveFilter] = useState<'panj' | 'beginner' | 'all'>('panj');
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
@@ -67,26 +69,108 @@ export const SurahsView: React.FC<SurahsViewProps> = ({
   const [cachedMap, setCachedMap] = useState<Record<number, boolean>>({});
   const [downloadingMap, setDownloadingMap] = useState<Record<number, number>>({}); // surahId -> percent
 
-  // Reader Settings
-  const [fontSize, setFontSize] = useState<number>(userProfile.fontSizeArabic || 28);
-  const [showTransliteration, setShowTransliteration] = useState(userProfile.showTransliteration);
-  const [showTranslation, setShowTranslation] = useState(userProfile.showTranslation);
-  const [translationLanguage, setTranslationLanguage] = useState<'both' | 'ur' | 'en'>(
-    userProfile.surahTranslationLang || (userProfile.language === 'ur' ? 'ur' : 'both')
-  );
+  // Reader Settings with robust local storage persistence (allows font 12px to 52px)
+  const savedReaderSettings = (() => {
+    try {
+      const raw = localStorage.getItem('panj_surah_reader_settings');
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return null;
+  })();
+
+  const [readingMode, setReadingMode] = useState<'mushaf' | 'study'>(() => {
+    if (savedReaderSettings && (savedReaderSettings.readingMode === 'mushaf' || savedReaderSettings.readingMode === 'study')) {
+      return savedReaderSettings.readingMode;
+    }
+    return 'mushaf'; // 16-Line Mushaf Mode is standard
+  });
+
+  const [fontSize, setFontSize] = useState<number>(() => {
+    if (savedReaderSettings && typeof savedReaderSettings.fontSize === 'number') {
+      return Math.max(12, Math.min(52, savedReaderSettings.fontSize));
+    }
+    return userProfile.fontSizeArabic || 28;
+  });
+
+  const [showTransliteration, setShowTransliteration] = useState<boolean>(() => {
+    if (savedReaderSettings && typeof savedReaderSettings.showTransliteration === 'boolean') {
+      return savedReaderSettings.showTransliteration;
+    }
+    return userProfile.showTransliteration;
+  });
+
+  const [showTranslation, setShowTranslation] = useState<boolean>(() => {
+    if (savedReaderSettings && typeof savedReaderSettings.showTranslation === 'boolean') {
+      return savedReaderSettings.showTranslation;
+    }
+    return userProfile.showTranslation ?? true;
+  });
+
+  const [translationLanguage, setTranslationLanguage] = useState<'both' | 'ur' | 'en'>(() => {
+    if (savedReaderSettings && savedReaderSettings.translationLanguage) {
+      return savedReaderSettings.translationLanguage;
+    }
+    return userProfile.surahTranslationLang || 'ur';
+  });
+
+  const [showMushafKanzulIman, setShowMushafKanzulIman] = useState<boolean>(() => {
+    if (savedReaderSettings && typeof savedReaderSettings.showMushafKanzulIman === 'boolean') {
+      return savedReaderSettings.showMushafKanzulIman;
+    }
+    return true;
+  });
+
+  const [savedSettingsNotice, setSavedSettingsNotice] = useState<string | null>(null);
+
+  // Helper to persist settings instantly to localStorage and userProfile
+  const persistSettings = (updates: {
+    fontSize?: number;
+    showTranslation?: boolean;
+    showTransliteration?: boolean;
+    translationLanguage?: 'both' | 'ur' | 'en';
+    showMushafKanzulIman?: boolean;
+    readingMode?: 'mushaf' | 'study';
+  }) => {
+    const nextFont = updates.fontSize !== undefined ? updates.fontSize : fontSize;
+    const nextTranslation = updates.showTranslation !== undefined ? updates.showTranslation : showTranslation;
+    const nextTransliteration = updates.showTransliteration !== undefined ? updates.showTransliteration : showTransliteration;
+    const nextLang = updates.translationLanguage !== undefined ? updates.translationLanguage : translationLanguage;
+    const nextMushafKanzul = updates.showMushafKanzulIman !== undefined ? updates.showMushafKanzulIman : showMushafKanzulIman;
+    const nextMode = updates.readingMode !== undefined ? updates.readingMode : readingMode;
+
+    const payload = {
+      fontSize: nextFont,
+      showTranslation: nextTranslation,
+      showTransliteration: nextTransliteration,
+      translationLanguage: nextLang,
+      showMushafKanzulIman: nextMushafKanzul,
+      readingMode: nextMode,
+    };
+
+    try {
+      localStorage.setItem('panj_surah_reader_settings', JSON.stringify(payload));
+    } catch (e) {
+      console.error('Failed to save reader settings:', e);
+    }
+
+    onUpdateProfile?.({
+      fontSizeArabic: nextFont,
+      showTranslation: nextTranslation,
+      showTransliteration: nextTransliteration,
+      surahTranslationLang: nextLang,
+    });
+
+    setSavedSettingsNotice('ترتیبات محفوظ ہو گئیں • Settings saved');
+    setTimeout(() => setSavedSettingsNotice(null), 3000);
+  };
 
   // 11 Ayat per page Mushaf pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
   const AYAT_PER_PAGE = 11;
-  const isAllTranslationsOff = !showTranslation && !showTransliteration;
 
-  // Set comfortable Mushaf font size when in continuous Arabic mode
   useEffect(() => {
-    if (isAllTranslationsOff) {
-      setFontSize(userProfile.fontSizeArabic || 28);
-      setCurrentPage(1);
-    }
-  }, [isAllTranslationsOff]);
+    setCurrentPage(1);
+  }, [readingMode, selectedSurah?.id]);
 
   // Check offline cache on mount
   useEffect(() => {
@@ -251,6 +335,11 @@ export const SurahsView: React.FC<SurahsViewProps> = ({
               <p className="text-xs text-neutral-400">
                 {selectedSurah.nameEnglish} • {selectedSurah.versesCount} Verses • {selectedSurah.revelationType}
               </p>
+              <div className="flex items-center justify-center gap-2 mt-1">
+                <span className="text-[11px] font-urdu font-medium text-emerald-300 bg-emerald-950/90 px-2.5 py-0.5 rounded-full border border-emerald-700/80 shadow-xs" dir="rtl">
+                  دعوتِ اسلامی معیار • 16 سطری رسم الخط • ترجمہ کنز الایمان
+                </span>
+              </div>
             </div>
 
             {/* PDF View & Read / Memorized Toggle */}
@@ -310,79 +399,134 @@ export const SurahsView: React.FC<SurahsViewProps> = ({
 
           {/* Reader Preferences Bar */}
           <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-neutral-950/60 border border-neutral-800 text-xs">
-            {/* Font Size controls */}
-            <div className="flex items-center gap-2">
-              <Type className="w-4 h-4 text-neutral-400" />
-              <span className="font-medium text-neutral-300">Arabic Size:</span>
+            {/* Font Size controls (Supports 12px to 52px) */}
+            <div className="flex items-center gap-1.5 bg-neutral-900 px-2 py-1.5 rounded-xl border border-neutral-800">
+              <Type className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span className="font-medium text-neutral-300 text-[11px]">Size:</span>
               <button
-                onClick={() => setFontSize((f) => Math.max(18, f - 2))}
-                className="px-2 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold"
+                onClick={() => {
+                  const next = Math.max(12, fontSize - 2);
+                  setFontSize(next);
+                  persistSettings({ fontSize: next });
+                }}
+                className="w-6 h-6 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold flex items-center justify-center transition-all cursor-pointer"
+                title="Reduce font size (minimum 12px)"
               >
                 -
               </button>
-              <span className="font-mono font-bold text-emerald-400">{fontSize}px</span>
+              <span className="font-mono font-bold text-emerald-400 px-1 min-w-[36px] text-center text-xs">
+                {fontSize}px
+              </span>
               <button
-                onClick={() => setFontSize((f) => Math.min(48, f + 2))}
-                className="px-2 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold"
+                onClick={() => {
+                  const next = Math.min(52, fontSize + 2);
+                  setFontSize(next);
+                  persistSettings({ fontSize: next });
+                }}
+                className="w-6 h-6 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-bold flex items-center justify-center transition-all cursor-pointer"
+                title="Increase font size"
               >
                 +
               </button>
+
+              {/* Quick Presets: 12px, 16px, 20px, 24px, 28px, 36px */}
+              <div className="hidden sm:flex items-center gap-1 pl-1 border-l border-neutral-700/80">
+                {[12, 16, 20, 24, 28, 36].map((sz) => (
+                  <button
+                    key={sz}
+                    onClick={() => {
+                      setFontSize(sz);
+                      persistSettings({ fontSize: sz });
+                    }}
+                    className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold transition-all cursor-pointer ${
+                      fontSize === sz
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'bg-neutral-800/80 text-neutral-400 hover:text-white'
+                    }`}
+                    title={`Set font to ${sz}px`}
+                  >
+                    {sz}px
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Quick 16-Line Mushaf (Arabic Only) Mode Toggle */}
-            <button
-              onClick={() => {
-                if (isAllTranslationsOff) {
-                  setShowTranslation(true);
-                  setShowTransliteration(true);
-                  setFontSize(userProfile.fontSizeArabic || 28);
-                } else {
-                  setShowTranslation(false);
-                  setShowTransliteration(false);
-                  setFontSize(userProfile.fontSizeArabic || 28);
-                  setCurrentPage(1);
-                }
-              }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                isAllTranslationsOff
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-emerald-100 text-emerald-900 border border-emerald-300 hover:bg-emerald-200 dark:bg-neutral-800 dark:text-neutral-300'
-              }`}
-              title="Toggle continuous Dawat-e-Islami 16-line Holy Mushaf recitation mode"
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>{isAllTranslationsOff ? '📖 16-Line Mushaf Active' : '📖 16-Line Mushaf Mode'}</span>
-            </button>
+            {/* Mode Switcher: 16-Line Mushaf vs Verse-by-Verse (Identical to Dawat-e-Islami PDF Modal) */}
+            <div className="flex items-center rounded-xl bg-neutral-900 border border-neutral-700/80 p-0.5 shadow-xs text-xs font-semibold">
+              <button
+                onClick={() => {
+                  setReadingMode('mushaf');
+                  persistSettings({ readingMode: 'mushaf' });
+                }}
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                  readingMode === 'mushaf'
+                    ? 'bg-emerald-600 text-white shadow-xs font-bold'
+                    : 'text-neutral-300 hover:text-white'
+                }`}
+                title="Continuous 16-Line Holy Mushaf Layout (Matches Dawat-e-Islami standard)"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>16-Line Mushaf</span>
+              </button>
+              <button
+                onClick={() => {
+                  setReadingMode('study');
+                  persistSettings({ readingMode: 'study' });
+                }}
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                  readingMode === 'study'
+                    ? 'bg-emerald-600 text-white shadow-xs font-bold'
+                    : 'text-neutral-300 hover:text-white'
+                }`}
+                title="Verse-by-Verse Study Mode with Kanzul Iman Translation & Transliteration"
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>Verse by Verse</span>
+              </button>
+            </div>
 
             {/* Toggle Transliteration & Translation & Translation Language */}
             <div className="flex flex-wrap items-center gap-2">
               <button
-                onClick={() => setShowTransliteration(!showTransliteration)}
-                className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
+                onClick={() => {
+                  const next = !showTransliteration;
+                  setShowTransliteration(next);
+                  persistSettings({ showTransliteration: next });
+                }}
+                className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
                   showTransliteration
                     ? 'bg-emerald-600 text-white'
                     : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
                 }`}
+                title="Toggle Transliteration (saves preference for next logon)"
               >
                 Transliteration
               </button>
               <button
-                onClick={() => setShowTranslation(!showTranslation)}
-                className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
+                onClick={() => {
+                  const next = !showTranslation;
+                  setShowTranslation(next);
+                  persistSettings({ showTranslation: next });
+                }}
+                className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
                   showTranslation
-                    ? 'bg-emerald-600 text-white'
+                    ? 'bg-emerald-600 text-white shadow-xs'
                     : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
                 }`}
+                title="Toggle Urdu/English Translation (saves preference for next logon)"
               >
-                Translation
+                Translation: {showTranslation ? 'ON' : 'OFF'}
               </button>
 
               {/* Urdu / English / Both Switcher */}
               {showTranslation && (
                 <div className="flex items-center bg-neutral-800/90 rounded-lg p-0.5 border border-neutral-700">
                   <button
-                    onClick={() => setTranslationLanguage('en')}
-                    className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all ${
+                    onClick={() => {
+                      setTranslationLanguage('en');
+                      persistSettings({ translationLanguage: 'en' });
+                    }}
+                    className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer ${
                       translationLanguage === 'en'
                         ? 'bg-emerald-600 text-white shadow-xs'
                         : 'text-neutral-400 hover:text-white'
@@ -391,18 +535,24 @@ export const SurahsView: React.FC<SurahsViewProps> = ({
                     English
                   </button>
                   <button
-                    onClick={() => setTranslationLanguage('ur')}
-                    className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all font-urdu ${
+                    onClick={() => {
+                      setTranslationLanguage('ur');
+                      persistSettings({ translationLanguage: 'ur' });
+                    }}
+                    className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all font-urdu cursor-pointer ${
                       translationLanguage === 'ur'
                         ? 'bg-emerald-600 text-white shadow-xs'
                         : 'text-neutral-400 hover:text-white'
                     }`}
                   >
-                    اردو
+                    اردو (کنز الایمان)
                   </button>
                   <button
-                    onClick={() => setTranslationLanguage('both')}
-                    className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all ${
+                    onClick={() => {
+                      setTranslationLanguage('both');
+                      persistSettings({ translationLanguage: 'both' });
+                    }}
+                    className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer ${
                       translationLanguage === 'both'
                         ? 'bg-emerald-600 text-white shadow-xs'
                         : 'text-neutral-400 hover:text-white'
@@ -412,6 +562,24 @@ export const SurahsView: React.FC<SurahsViewProps> = ({
                   </button>
                 </div>
               )}
+            </div>
+
+            {/* Saved Notification Indicator & Explicit Save Button */}
+            <div className="flex items-center gap-2">
+              {savedSettingsNotice && (
+                <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-700/80 text-[11px] font-semibold animate-pulse select-none">
+                  <Check className="w-3 h-3 text-emerald-400" />
+                  {savedSettingsNotice}
+                </span>
+              )}
+              <button
+                onClick={() => persistSettings({})}
+                className="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white border border-neutral-700 text-[11px] font-semibold flex items-center gap-1 transition-all cursor-pointer"
+                title="Save current font size and translation options permanently"
+              >
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Save Setting</span>
+              </button>
             </div>
 
             {/* Offline Audio Badge / Button */}
@@ -529,17 +697,17 @@ export const SurahsView: React.FC<SurahsViewProps> = ({
           {/* Bismillah Header (except for Surah At-Tawbah) */}
           {selectedSurah.number !== 9 && (
             <div className="text-center py-6 border-b border-neutral-800">
-              <div className="font-arabic text-3xl sm:text-4xl text-emerald-400 leading-relaxed">
-                بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+              <div className="font-mushaf font-arabic text-3xl sm:text-4xl text-emerald-400 leading-relaxed font-bold">
+                بِسۡمِ اللهِ الرَّحۡمٰنِ الرَّحِيۡمِ
               </div>
-              <p className="text-xs text-neutral-400 mt-1 italic">
-                In the name of Allah, the Entirely Merciful, the Especially Merciful
+              <p className="text-xs text-emerald-400/80 mt-1 font-urdu font-medium" dir="rtl">
+                اللہ کے نام سے شروع جو بہت مہربان رحمت والا
               </p>
             </div>
           )}
 
-          {/* Verses Content: 11 Ayat/Page Mushaf Mode when translations off, OR full continuous translated list */}
-          {isAllTranslationsOff ? (
+          {/* Verses Content: 16-Line Holy Mushaf Mode, OR Verse-by-Verse Study Mode with Kanzul Iman */}
+          {readingMode === 'mushaf' ? (
             (() => {
               const totalPages = Math.ceil(selectedSurah.verses.length / AYAT_PER_PAGE);
               const startIdx = (currentPage - 1) * AYAT_PER_PAGE;
@@ -594,10 +762,27 @@ export const SurahsView: React.FC<SurahsViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Mushaf Page Container (16-Line Holy Mushaf Style) */}
-                  <div className="bg-white rounded-3xl border-2 border-emerald-600/30 p-6 sm:p-9 shadow-md relative dark:bg-neutral-900/90 dark:border-emerald-800/50">
-                    <div className="border-b border-emerald-200/60 pb-3 mb-6 flex items-center justify-between text-xs text-emerald-900 font-bold dark:text-emerald-400">
-                      <span>سُورَةُ {selectedSurah.nameArabic}</span>
+                  {/* Mushaf Page Container (16-Line Holy Mushaf Style - Dawat-e-Islami Verified) */}
+                  <div className="bg-[#fffefb] rounded-3xl border-2 border-emerald-700/40 p-6 sm:p-9 shadow-md relative dark:bg-neutral-900/90 dark:border-emerald-800/50">
+                    <div className="border-b border-emerald-200/60 pb-3 mb-6 flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-900 font-bold dark:text-emerald-400">
+                      <span className="font-mushaf font-arabic text-base sm:text-lg text-emerald-900 dark:text-emerald-300">
+                        سُورَةُ {selectedSurah.nameArabic}
+                      </span>
+                      <button
+                        onClick={() => {
+                          const next = !showMushafKanzulIman;
+                          setShowMushafKanzulIman(next);
+                          persistSettings({ showMushafKanzulIman: next });
+                        }}
+                        className={`px-3 py-1 rounded-xl text-xs font-bold font-urdu transition-all cursor-pointer flex items-center gap-1.5 ${
+                          showMushafKanzulIman
+                            ? 'bg-emerald-700 text-white shadow-xs'
+                            : 'bg-emerald-100 text-emerald-900 border border-emerald-300 hover:bg-emerald-200 dark:bg-neutral-800 dark:text-emerald-300'
+                        }`}
+                        title="Toggle Kanzul Iman translation on this Mushaf page"
+                      >
+                        <span>{showMushafKanzulIman ? '✓ ساتھ ترجمہ کنز الایمان فعال ہے' : '📖 ساتھ ترجمہ کنز الایمان دیکھیں'}</span>
+                      </button>
                       <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-800 font-mono dark:bg-neutral-800 dark:text-neutral-300">
                         16-Line Mushaf Mode • Page {currentPage} of {totalPages} ({fontSize}px)
                       </span>
@@ -605,21 +790,49 @@ export const SurahsView: React.FC<SurahsViewProps> = ({
                     </div>
 
                     <div
-                      className="font-mushaf font-arabic text-right text-slate-900 leading-[3.0] space-y-3 dark:text-neutral-100"
+                      className="font-mushaf font-arabic text-right text-slate-950 leading-[2.2] tracking-wide text-justify space-y-3 dark:text-neutral-100"
                       dir="rtl"
                       style={{ fontSize: `${fontSize}px` }}
                     >
                       {currentVerses.map((verse) => (
                         <span key={verse.id} className="inline ml-2.5">
-                          <span className="font-normal text-slate-900 dark:text-neutral-100">
+                          <span className="font-normal text-slate-950 dark:text-neutral-100">
                             {verse.textArabic}
                           </span>
-                          <span className="inline-flex items-center justify-center mx-1.5 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-xs font-mono font-bold border border-emerald-300 select-none dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800">
+                          <span className="inline-flex items-center justify-center mx-1.5 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-950 text-xs font-mono font-bold border border-emerald-400 select-none shadow-xs dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-700">
                             ۝ {verse.number}
                           </span>
                         </span>
                       ))}
                     </div>
+
+                    {/* Kanzul Iman Urdu Translation on this Mushaf page */}
+                    {showMushafKanzulIman && (
+                      <div className="mt-8 pt-5 border-t-2 border-dashed border-emerald-300 dark:border-neutral-800 space-y-3">
+                        <div className="flex items-center justify-between text-xs font-bold font-urdu text-emerald-900 dark:text-emerald-400" dir="rtl">
+                          <span className="bg-emerald-100 dark:bg-emerald-950 px-3 py-1 rounded-lg border border-emerald-300 dark:border-emerald-800 shadow-xs">
+                            ترجمہ کنز الایمان (امام احمد رضا خان علیہ الرحمہ) — آیات {startIdx + 1} تا {endIdx}
+                          </span>
+                          <span className="text-[11px] font-sans font-medium text-slate-500 dark:text-neutral-400">
+                            دعوتِ اسلامی معیار
+                          </span>
+                        </div>
+                        <div className="space-y-2.5">
+                          {currentVerses.map((verse) => (
+                            <div
+                              key={`mushaf-ur-${verse.id}`}
+                              className="font-urdu text-right text-emerald-950 dark:text-emerald-100 text-sm sm:text-base leading-loose p-3 rounded-xl bg-emerald-50/70 dark:bg-neutral-950/70 border border-emerald-200/80 dark:border-neutral-800"
+                              dir="rtl"
+                            >
+                              <span className="font-mono text-xs font-bold text-emerald-800 dark:text-emerald-300 ml-2 bg-emerald-100 dark:bg-emerald-900/60 px-2 py-0.5 rounded border border-emerald-300 dark:border-emerald-700 select-none">
+                                آیت {verse.number}
+                              </span>
+                              {verse.translationUr}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     <div className="mt-8 pt-3 border-t border-emerald-200/60 flex items-center justify-between text-xs text-slate-500 dark:text-neutral-400">
                       <span>Panj Surah Sacred Mushaf</span>
@@ -663,21 +876,21 @@ export const SurahsView: React.FC<SurahsViewProps> = ({
                 <div
                   key={verse.id}
                   id={`verse-${selectedSurah.id}-${verse.number}`}
-                  className="p-5 rounded-2xl bg-neutral-900/80 border border-neutral-800 space-y-3 transition-colors hover:border-neutral-700 shadow-sm"
+                  className="p-5 rounded-2xl bg-white dark:bg-neutral-900/80 border border-emerald-200 dark:border-neutral-800 space-y-3 transition-colors hover:border-emerald-300 dark:hover:border-neutral-700 shadow-sm"
                 >
                   {/* Verse Number Badge & Arabic Text */}
                   <div className="flex items-start justify-between gap-4">
-                    <span className="w-8 h-8 rounded-full bg-neutral-800 text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0 border border-neutral-700">
+                    <span className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-neutral-800 text-emerald-900 dark:text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0 border border-emerald-300 dark:border-neutral-700">
                       {verse.number}
                     </span>
 
                     <div
-                      className="font-mushaf font-arabic text-right text-slate-900 dark:text-neutral-100 flex-1 leading-[2.8]"
+                      className="font-mushaf font-arabic text-right text-slate-950 dark:text-neutral-100 flex-1 leading-[2.4] tracking-wide"
                       style={{ fontSize: `${fontSize}px` }}
                       dir="rtl"
                     >
-                      {verse.textArabic}{' '}
-                      <span className="inline-flex items-center justify-center mx-1.5 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-950 text-xs font-mono font-bold border border-emerald-300 select-none dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-700">
+                      <span className="font-normal">{verse.textArabic}</span>{' '}
+                      <span className="inline-flex items-center justify-center mx-1.5 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-950 text-xs font-mono font-bold border border-emerald-400 select-none shadow-xs dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-700">
                         ۝ {verse.number}
                       </span>
                     </div>
@@ -693,13 +906,21 @@ export const SurahsView: React.FC<SurahsViewProps> = ({
                   {/* Translations (Urdu / English / Both) */}
                   {showTranslation && (
                     <div className="space-y-2 pl-2 sm:pl-10">
-                      {/* Urdu Translation */}
+                      {/* Urdu Translation (Kanzul Iman by Ala Hazrat Imam Ahmad Raza Khan - Dawat-e-Islami Standard) */}
                       {(translationLanguage === 'ur' || translationLanguage === 'both') && verse.translationUr && (
                         <div
-                          className="text-sm sm:text-base text-emerald-300/95 font-urdu text-right leading-loose bg-neutral-950/40 p-2.5 rounded-xl border border-neutral-800/80"
+                          className="text-sm sm:text-base text-emerald-300/95 font-urdu text-right leading-loose bg-neutral-950/50 p-3 rounded-xl border border-emerald-900/40 space-y-1"
                           dir="rtl"
                         >
-                          {verse.translationUr}
+                          <div className="flex items-center justify-between text-xs text-emerald-400 font-sans pb-1 mb-1 border-b border-emerald-950/60">
+                            <span className="font-urdu font-bold text-[11px] px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-emerald-300 shadow-xs">
+                              ترجمہ: کنز الایمان (امام احمد رضا خان علیہ الرحمہ)
+                            </span>
+                            <span className="text-[10px] text-neutral-400 font-sans">
+                              Dawat-e-Islami Standard
+                            </span>
+                          </div>
+                          <div>{verse.translationUr}</div>
                         </div>
                       )}
 
@@ -1043,7 +1264,7 @@ export const SurahsView: React.FC<SurahsViewProps> = ({
 
             {/* Quick Suggestions */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar">
-              {['Yaseen', 'Mulk', 'Rahman', 'Kahf', 'Waqiah', 'Ikhlas'].map((q) => (
+              {['Yaseen', 'Mulk', 'Rahman', 'Waqiah', 'Muzzammil', 'Kahf', 'Sajdah', 'Fath', 'Ikhlas'].map((q) => (
                 <button
                   key={q}
                   onClick={() => setQuickSwitchSearch(q)}

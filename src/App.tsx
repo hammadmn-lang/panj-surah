@@ -110,7 +110,7 @@ const DEFAULT_PROFILE: UserProfile = {
   gender: 'brother',
   language: 'en',
   theme: 'emerald-light',
-  surahTranslationLang: 'both',
+  surahTranslationLang: 'ur',
   audioAutoDownload: false,
   fontSizeArabic: 28,
   showTranslation: true,
@@ -723,6 +723,7 @@ export function App() {
             userProfile={userProfile}
             onToggleSurahCompleted={handleToggleSurahCompleted}
             initialSearchTerm={surahSearchInitial}
+            onUpdateProfile={handleUpdateProfile}
           />
         )}
 

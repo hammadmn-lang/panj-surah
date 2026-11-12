@@ -43,7 +43,9 @@ export const ManzilReaderModal: React.FC<ManzilReaderModalProps> = ({
 }) => {
   const [viewMode, setViewMode] = useState<'continuous' | 'stepper'>('continuous');
   const [activeStep, setActiveStep] = useState<number>(0);
-  const [fontSizeClass, setFontSizeClass] = useState<'text-xl' | 'text-2xl' | 'text-3xl' | 'text-4xl'>('text-3xl');
+  const [fontSizeClass, setFontSizeClass] = useState<
+    'text-xs' | 'text-sm' | 'text-base' | 'text-xl' | 'text-2xl' | 'text-3xl' | 'text-4xl'
+  >('text-3xl');
   const [showUrdu, setShowUrdu] = useState<boolean>(true);
   const [showEnglish, setShowEnglish] = useState<boolean>(true);
   const [showTransliteration, setShowTransliteration] = useState<boolean>(true);
@@ -309,28 +311,37 @@ export const ManzilReaderModal: React.FC<ManzilReaderModalProps> = ({
               Translit
             </button>
 
-            {/* Font Size controls */}
+            {/* Font Size controls (Supports 12px to 36px) */}
             <div className="inline-flex items-center gap-1 pl-1">
               <button
                 onClick={() => {
                   if (fontSizeClass === 'text-4xl') setFontSizeClass('text-3xl');
                   else if (fontSizeClass === 'text-3xl') setFontSizeClass('text-2xl');
                   else if (fontSizeClass === 'text-2xl') setFontSizeClass('text-xl');
+                  else if (fontSizeClass === 'text-xl') setFontSizeClass('text-base');
+                  else if (fontSizeClass === 'text-base') setFontSizeClass('text-sm');
+                  else if (fontSizeClass === 'text-sm') setFontSizeClass('text-xs');
                 }}
-                disabled={fontSizeClass === 'text-xl'}
-                className="px-2 py-1 rounded-lg bg-neutral-950 border border-neutral-800 text-neutral-300 hover:text-white disabled:opacity-40 cursor-pointer"
-                title="Decrease Arabic font size"
+                disabled={fontSizeClass === 'text-xs'}
+                className="px-2 py-1 rounded-lg bg-neutral-950 border border-neutral-800 text-neutral-300 hover:text-white disabled:opacity-40 cursor-pointer text-xs font-bold"
+                title="Decrease Arabic font size (minimum 12px)"
               >
                 A-
               </button>
+              <span className="text-[10px] font-mono text-emerald-400 px-1">
+                {fontSizeClass === 'text-xs' ? '12px' : fontSizeClass === 'text-sm' ? '14px' : fontSizeClass === 'text-base' ? '16px' : fontSizeClass === 'text-xl' ? '20px' : fontSizeClass === 'text-2xl' ? '24px' : fontSizeClass === 'text-3xl' ? '30px' : '36px'}
+              </span>
               <button
                 onClick={() => {
-                  if (fontSizeClass === 'text-xl') setFontSizeClass('text-2xl');
+                  if (fontSizeClass === 'text-xs') setFontSizeClass('text-sm');
+                  else if (fontSizeClass === 'text-sm') setFontSizeClass('text-base');
+                  else if (fontSizeClass === 'text-base') setFontSizeClass('text-xl');
+                  else if (fontSizeClass === 'text-xl') setFontSizeClass('text-2xl');
                   else if (fontSizeClass === 'text-2xl') setFontSizeClass('text-3xl');
                   else if (fontSizeClass === 'text-3xl') setFontSizeClass('text-4xl');
                 }}
                 disabled={fontSizeClass === 'text-4xl'}
-                className="px-2 py-1 rounded-lg bg-neutral-950 border border-neutral-800 text-neutral-300 hover:text-white disabled:opacity-40 cursor-pointer"
+                className="px-2 py-1 rounded-lg bg-neutral-950 border border-neutral-800 text-neutral-300 hover:text-white disabled:opacity-40 cursor-pointer text-xs font-bold"
                 title="Increase Arabic font size"
               >
                 A+
